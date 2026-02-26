@@ -122,6 +122,20 @@ Tham khảo các hướng dẫn này khi:
 - Sử dụng `UsageHelpButton` để hiển thị contextual feature documentation
 - Sử dụng `VerticalSteps` để render vertical sidebar step navigator
 - Sử dụng hook `useResponsive`
+- Sử dụng hook `useConvertPageSettings` cho chuyển đổi page settings thành CSS styles
+- Sử dụng hook `useForceUpdate` cho force re-render component
+- Sử dụng hook `useGetDataFieldBySlug` cho lấy data field theo slug/ID từ object
+- Sử dụng hook `useGetDataFieldOptionLabel` cho lấy label option của data field
+- Sử dụng hook `useGetFieldLabel` cho lấy label hiển thị của field từ slug
+- Sử dụng hook `useGetLayout` cho quản lý form layout (standard/custom)
+- Sử dụng hook `useGetRecordPageLink` cho tạo link điều hướng record (serial/normal)
+- Sử dụng hook `useGetStateFromSearchParams` cho lấy typed state từ URL search params
+- Sử dụng hook `useHistoriesState` cho undo/redo state management
+- Sử dụng hook `useMergeRecordFilters` cho merge nhiều bộ lọc record
+- Sử dụng hook `useMergedRefs` cho merge nhiều refs lại với nhau
+- Sử dụng hook `useReplaceRecordValue` cho thay thế template variables bằng giá trị record
+- Sử dụng hook `useSaveToSearchParams` cho lưu state vào URL search params
+- Sử dụng hook `useSyncState` cho đồng bộ state giữa các tab trình duyệt
 - Review code có sử dụng bất kỳ component nào ở trên
 - Lựa chọn giữa `Tooltip` vs `SmartTooltip`, hoặc `Button onlyIcon` vs `IconButton`
 - Lựa chọn giữa controlled vs uncontrolled mode cho `CollapsibleContainer`
@@ -1208,6 +1222,116 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-URL-07` — Sử dụng `displayTextInputProps` để tùy chỉnh input display text
 - `RULE-URL-08` — Popper display text tự động bị vô hiệu hóa khi `disabled` hoặc `readOnly`
 
+### Hooks
+
+#### useConvertPageSettings (`uikit-use-convert-page-settings`)
+
+- `RULE-CPS-01` — Luôn truyền `pageSettings` — đây là prop bắt buộc duy nhất
+- `RULE-CPS-02` — Sử dụng `fromModal={true}` khi render trong modal — hook trả về styles rỗng
+- `RULE-CPS-03` — Sử dụng `editMode` để phân biệt breadcrumb giữa create và edit mode
+- `RULE-CPS-04` — Không tự parse JSON hoặc tính toán CSS từ page settings
+- `RULE-CPS-05` — Áp dụng `settingPageStyles` cho container ngoài, `settingContentPageStyles` cho content
+
+#### useForceUpdate (`uikit-use-force-update`)
+
+- `RULE-FU-01` — Sử dụng `useForceUpdate` thay vì tự tạo state counter
+- `RULE-FU-02` — Sử dụng `forceUpdateState` làm dependency khi cần trigger effect sau re-render
+- `RULE-FU-03` — Chỉ sử dụng khi React dependency tracking không đủ — ưu tiên quản lý state đúng cách
+
+#### useGetDataFieldBySlug (`uikit-use-get-data-field-by-slug`)
+
+- `RULE-GDFBS-01` — Ưu tiên truyền `objectSlug` — chỉ dùng `objectId` khi không có slug
+- `RULE-GDFBS-02` — Ưu tiên `dataFieldSlugs` — hook bỏ qua `dataFieldIds` nếu slugs được truyền
+- `RULE-GDFBS-03` — Kết quả giữ nguyên thứ tự mảng đầu vào — null nếu không tìm thấy
+- `RULE-GDFBS-04` — Không tự fetch object và tìm field — hook đã tích hợp `useQueryObjectDetailBySlug`
+- `RULE-GDFBS-05` — Kiểm tra `isLoading` trước khi sử dụng `fields`
+
+#### useGetDataFieldOptionLabel (`uikit-use-get-data-field-option-label`)
+
+- `RULE-GDFOL-01` — Luôn truyền `objectSlug` — đây là prop bắt buộc duy nhất
+- `RULE-GDFOL-02` — Sử dụng `getOptionLabel` thay vì tự tìm kiếm option trong fields
+- `RULE-GDFOL-03` — Hàm trả về chuỗi rỗng khi không tìm thấy — không cần kiểm tra null
+- `RULE-GDFOL-04` — Callback đã được memoize — an toàn khi dùng trong dependency array
+
+#### useGetFieldLabel (`uikit-use-get-field-label`)
+
+- `RULE-GFL-01` — Luôn truyền đủ `objectSlug` và `fieldSlugs` — đây là 2 props bắt buộc
+- `RULE-GFL-02` — Không tự fetch object và tìm field name — hook đã tích hợp API
+- `RULE-GFL-03` — Kết quả giữ nguyên thứ tự mảng đầu vào — chuỗi rỗng cho slug không tìm thấy
+- `RULE-GFL-04` — Truyền `hasTranslate={false}` khi cần tên gốc (chưa dịch)
+
+#### useGetLayout (`uikit-use-get-layout`)
+
+- `RULE-GL-01` — Luôn truyền đủ `functionLabel` và `objectSlug` — đây là 2 props bắt buộc
+- `RULE-GL-02` — Sử dụng `"ADD"` cho form tạo mới, `"VIEW"` cho form xem/sửa
+- `RULE-GL-03` — Sử dụng `hiddenFieldSlugs` để ẩn fields — không tự lọc layout
+- `RULE-GL-04` — Sử dụng `readOnlyFieldSlugs` để đánh dấu fields chỉ đọc
+- `RULE-GL-05` — Kết hợp với `LayoutSelectButton` để chuyển layout
+- `RULE-GL-06` — Kiểm tra `isLoading` trước khi render FormBuilder
+- `RULE-GL-07` — Sử dụng `layoutId` khi cần layout cụ thể
+
+#### useGetRecordPageLink (`uikit-use-get-record-page-link`)
+
+- `RULE-GRPL-01` — Luôn sử dụng hook thay vì hardcode route — tự phát hiện serial page context
+- `RULE-GRPL-02` — Sử dụng đúng hàm: `listPageLink`, `createPageLink`, `viewPageLink`
+- `RULE-GRPL-03` — Không tự kiểm tra pathname — hook đã tự phát hiện `/s/` hoặc `/c/s/`
+- `RULE-GRPL-04` — Không tự sử dụng `generatePath` và `routeMapFullPath` — hook đã wrap sẵn
+
+#### useGetStateFromSearchParams (`uikit-use-get-state-from-search-params`)
+
+- `RULE-GSSP-01` — Truyền hàm `getState` để chuyển đổi search params thành typed state
+- `RULE-GSSP-02` — Không tự parse `location.search` — hook reactive với URL
+- `RULE-GSSP-03` — Kết hợp với `useSaveToSearchParams` để tạo two-way binding URL ↔ State
+- `RULE-GSSP-04` — Hàm `getState` nên cung cấp giá trị mặc định cho mỗi field
+
+#### useHistoriesState (`uikit-use-histories-state`)
+
+- `RULE-HS-01` — Sử dụng `push` thêm state mới, `replace` cập nhật state hiện tại — không nhầm
+- `RULE-HS-02` — Kiểm tra `canBack`/`canForward` trước khi hiển thị nút undo/redo
+- `RULE-HS-03` — Bật `enableShortcuts` để hỗ trợ Ctrl/Cmd+Z và Ctrl/Cmd+Shift+Z
+- `RULE-HS-04` — Sử dụng `toggleShortcuts` để tạm tắt khi component khác cần phím tắt
+- `RULE-HS-05` — Hook tự loại bỏ state trùng lặp — không cần kiểm tra trước khi push
+- `RULE-HS-06` — Không tự implement undo/redo — sử dụng hook này
+
+#### useMergeRecordFilters (`uikit-use-merge-record-filters`)
+
+- `RULE-MRF-01` — Sử dụng `mergeRecordFilters` thay vì tự merge — hook xử lý logic expression tự động
+- `RULE-MRF-02` — Filters với `logicType: "NONE"` tự động bị loại bỏ
+- `RULE-MRF-03` — Truyền `undefined` trong mảng filters được phép — hook tự bỏ qua
+- `RULE-MRF-04` — Kết quả luôn có cấu trúc hợp lệ — object rỗng khi không có filter
+- `RULE-MRF-05` — Sử dụng `logicType: "OR"` khi cần bất kỳ điều kiện nào thỏa mãn
+
+#### useMergedRefs (`uikit-use-merge-refs`)
+
+- `RULE-MREFS-01` — Sử dụng `useMergedRefs` khi cần gán nhiều refs cho cùng element
+- `RULE-MREFS-02` — Hook hỗ trợ cả function refs và object refs
+- `RULE-MREFS-03` — Sử dụng phổ biến trong `forwardRef` components
+- `RULE-MREFS-04` — Tên export là `useMergedRefs` (có "d") — không phải `useMergeRefs`
+
+#### useReplaceRecordValue (`uikit-use-replace-record-value`)
+
+- `RULE-RRV-01` — Template variables format: `{$variableName.path.to.field}` — `$` bắt buộc
+- `RULE-RRV-02` — `variableRecordMap` key phải khớp tên biến trong template (bao gồm `$`)
+- `RULE-RRV-03` — Hàm là async — phải await hoặc .then()
+- `RULE-RRV-04` — Hook tự batch API calls và cache — không cần tối ưu bên ngoài
+- `RULE-RRV-05` — Không tự fetch và replace — hook render giá trị theo đúng kiểu field
+
+#### useSaveToSearchParams (`uikit-use-save-to-search-params`)
+
+- `RULE-STSP-01` — Truyền object data — hook tự merge và loại bỏ giá trị rỗng
+- `RULE-STSP-02` — Không tự cập nhật URL — hook dùng debounce 800ms và replace history
+- `RULE-STSP-03` — Sử dụng `disabled` để tạm dừng cập nhật URL
+- `RULE-STSP-04` — Kết hợp với `useGetStateFromSearchParams` cho two-way binding
+- `RULE-STSP-05` — Hook bỏ qua lần render đầu tiên
+
+#### useSyncState (`uikit-use-sync-state`)
+
+- `RULE-SS-01` — API giống `useState` — destructure thành `[state, setState]`
+- `RULE-SS-02` — `key` phải duy nhất — channel name là `sync-state-{key}`
+- `RULE-SS-03` — Không tự implement BroadcastChannel — hook xử lý cleanup
+- `RULE-SS-04` — Khi `value` prop thay đổi, state local tự cập nhật
+- `RULE-SS-05` — Chỉ hoạt động giữa các tab cùng origin
+
 ## Rule Files
 
 ```
@@ -1311,6 +1435,20 @@ rules/uikit-tree-select.md
 rules/uikit-url-input.md
 rules/uikit-usage-help-button.md
 rules/uikit-use-responsive.md
+rules/uikit-use-convert-page-settings.md
+rules/uikit-use-force-update.md
+rules/uikit-use-get-data-field-by-slug.md
+rules/uikit-use-get-data-field-option-label.md
+rules/uikit-use-get-field-label.md
+rules/uikit-use-get-layout.md
+rules/uikit-use-get-record-page-link.md
+rules/uikit-use-get-state-from-search-params.md
+rules/uikit-use-histories-state.md
+rules/uikit-use-merge-record-filters.md
+rules/uikit-use-merge-refs.md
+rules/uikit-use-replace-record-value.md
+rules/uikit-use-save-to-search-params.md
+rules/uikit-use-sync-state.md
 rules/uikit-vertical-steps.md
 rules/uikit-import-source.md
 rules/uikit-text-vietnamese-first.md

@@ -44,7 +44,7 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-LIST-PAGE-04` — Trang chính: FormProvider + useGetStateFromSearchParams + SyncFilterFormWithSearchParams + ResizableMenu
 - `RULE-LIST-PAGE-05` — Bảng dữ liệu: TableSettings + ListViewTable + useTableV2 + useDebounceValue + buildParamsFromFilter
 - `RULE-LIST-PAGE-06` — Helper: guard bằng `filterTypes.includes()`, chỉ gửi param có giá trị, normalize date range
-- `RULE-LIST-PAGE-07` — useGetColumns hook: useMemo, nhận action callbacks, dùng SmartTooltip/CreatedByInfo/DateTimeWithTooltip
+- `RULE-LIST-PAGE-07` — useGetColumns hook: useMemo, nhận action callbacks, dùng SmartTooltip/CreatedByInfo
 - `RULE-LIST-PAGE-08` — FilterMenu: useFormContext, render có điều kiện theo filterTypes, sync URL, appendToBody={false}
 - `RULE-LIST-PAGE-09` — ActionMenu: Popper + PopperMenu + PopperMenuItem, spread `{...params} {...attributes}`, hide-on-click
 - `RULE-LIST-PAGE-10` — Flow: URL → Form → useWatch → debounce → buildParams → React Query → Table
@@ -63,26 +63,18 @@ Tham khảo các hướng dẫn này khi:
 
 ### Common Components
 
-- Sử dụng `Accordion` từ ui-kit cho expandable/collapsible sections (uncontrolled)
 - Sử dụng `Alert` từ ui-kit cho hiển thị thông báo warning/info
 - Sử dụng `Avatar` hoặc `AvatarField` từ ui-kit cho hiển thị ảnh đại diện
 - Sử dụng `BreadCrumbs` từ ui-kit cho navigation breadcrumbs với dropdown
 - Sử dụng `Button`, `ButtonGroup`, `IconButton`, `Tooltip`, hoặc `SmartTooltip` từ ui-kit
-- Sử dụng `Calendar` từ ui-kit cho hiển thị calendar standalone
-- Sử dụng `Cascader` từ ui-kit cho hierarchical selection (chọn theo cấp bậc)
 - Sử dụng `Checkbox`, `CheckboxGroup`, hoặc `FormControlLabel` từ ui-kit
-- Sử dụng `CircularProgressBar` từ ui-kit cho hiển thị progress dạng vòng tròn
 - Sử dụng `CKEditor` từ ui-kit cho rich text editor
 - Sử dụng `CollapsibleContainer` từ ui-kit
-- Sử dụng `ColorPicker` từ ui-kit cho chọn màu sắc
 - Sử dụng `ConfirmModal` cho xác nhận hành động nguy hiểm
-- Sử dụng `CopyButton` để copy text vào clipboard
-- Sử dụng `CountrySelect` từ ui-kit cho chọn quốc gia
 - Sử dụng `CreatedByInfo` để hiển thị thông tin creator (avatar + name)
 - Sử dụng `DatePicker` hoặc `DatePickerRelative` từ ui-kit cho chọn ngày/giờ
 - Sử dụng `DateRangeCalendar` từ ui-kit cho chọn khoảng ngày trên calendar
 - Sử dụng `DateRangePicker` từ ui-kit cho chọn khoảng ngày với input
-- Sử dụng `DateTimeWithTooltip` từ ui-kit cho hiển thị ngày giờ với tooltip timezone
 - Sử dụng `DraggableWrapper` và `DraggableItem` từ ui-kit cho sortable drag-and-drop (react-beautiful-dnd)
 - Sử dụng `Drawer` từ ui-kit cho side panel/drawer
 - Sử dụng `FilePreview` hoặc `BaseFilePreview` từ ui-kit cho xem trước file
@@ -91,25 +83,17 @@ Tham khảo các hướng dẫn này khi:
 - Sử dụng `FormBuilder` từ ui-kit cho form động dựa trên layout từ server (server-driven form)
 - Sử dụng `FormControlLabel` từ ui-kit để gắn label cho control (Checkbox, Radio, Switch)
 - Sử dụng `HelpButton` để thêm inline contextual help
-- Sử dụng `HelperText` để hiển thị form field helper/error/warning messages
 - Sử dụng `HorizontalSteps` để implement multi-step wizard UI
 - Sử dụng `InsertFieldObjectButtonV2` từ ui-kit cho nút mở modal chọn trường dữ liệu
 - Sử dụng `InsertFieldObjectButtonWrapper2` từ ui-kit cho wrapper hiển thị biến đã chọn với nút clear
 - Sử dụng `InsertFieldObjectV2` từ ui-kit cho modal chọn trường dữ liệu dạng cascader
 - Sử dụng `LayoutSelectButton` từ ui-kit cho nút chọn layout hiển thị
-- Sử dụng `LazyImage` để render images với lazy loading và fallback
 - Sử dụng `LimitableList` từ ui-kit cho hiển thị danh sách với giới hạn số lượng
 - Sử dụng `ListViewTable` từ ui-kit cho bảng dữ liệu có header với action buttons
-- Sử dụng `MarkdownPreview` từ ui-kit cho render markdown content
 - Sử dụng `Modal` và `ModalFooter` để xây dựng dialog và overlay
-- Sử dụng `Pagination` từ ui-kit cho phân trang
-- Sử dụng `PersonnelDetailCard` hoặc `PersonnelDetailPopper` từ ui-kit cho hiển thị thông tin nhân sự
 - Sử dụng `Popper`, `PopperMenu`, hoặc `PopperMenuItem` từ ui-kit
-- Sử dụng `PopperRecordInfo` từ ui-kit cho hiển thị thông tin record trong popup
 - Sử dụng `ResizeBar` để implement resizable panels hoặc sidebar
-- Sử dụng `Show` từ ui-kit cho conditional rendering
 - Sử dụng `Skeleton` từ ui-kit cho loading placeholder
-- Sử dụng `SpinnerComponent` từ ui-kit cho loading spinner
 - Sử dụng `StepProgressBar` để hiển thị step-based progress
 - Sử dụng `Steps` để render step wizard indicator
 - Sử dụng `StringeeDndContext`, `DndContainer`, và `useDndHandle` cho drag-and-drop
@@ -117,12 +101,9 @@ Tham khảo các hướng dẫn này khi:
 - Sử dụng `TableSettings` từ ui-kit cho cài đặt cột bảng (ẩn/hiện, ghim, kéo thả, editable)
 - Sử dụng `Tabs` để xây dựng tab navigation
 - Sử dụng `Tag` để hiển thị labels, chips, hoặc removable tags
-- Sử dụng `ToastMessage`, `ToastContainer`, và `showToastMessage` cho in-app notifications
-- Sử dụng `ToggleCollapseButton` từ ui-kit cho nút toggle collapse với icon chevron
+- Sử dụng `showToastMessage` cho in-app notifications
 - Sử dụng `UsageHelpButton` để hiển thị contextual feature documentation
 - Sử dụng `VerticalSteps` để render vertical sidebar step navigator
-- Sử dụng hook `useResponsive`
-- Sử dụng hook `useConvertPageSettings` cho chuyển đổi page settings thành CSS styles
 - Sử dụng hook `useForceUpdate` cho force re-render component
 - Sử dụng hook `useGetDataFieldBySlug` cho lấy data field theo slug/ID từ object
 - Sử dụng hook `useGetDataFieldOptionLabel` cho lấy label option của data field
@@ -213,16 +194,6 @@ Tham khảo các hướng dẫn này khi:
 
 ### Common Components
 
-#### Accordion (`uikit-accordion`)
-
-- `RULE-ACCORDION-01` — Accordion chỉ hỗ trợ uncontrolled mode — không có prop `isOpen`/`onChange`
-- `RULE-ACCORDION-02` — Sử dụng `defaultOpen` thay vì tự quản lý initial state
-- `RULE-ACCORDION-03` — Không truyền rõ ràng `defaultOpen={false}` — đó là giá trị mặc định
-- `RULE-ACCORDION-04` — Truyền `title` dạng ReactNode cho header phong phú
-- `RULE-ACCORDION-05` — Sử dụng `headerClassName` để style header, không override bằng children wrapper
-- `RULE-ACCORDION-06` — Sử dụng `className` để style container ngoài cùng
-- `RULE-ACCORDION-07` — Không tự tạo animation collapse/expand cho children
-
 #### Alert (`uikit-alert`)
 
 - `RULE-ALERT-01` — Sử dụng `variant` phù hợp với ngữ cảnh thông báo — `"warning"` hoặc `"info"`
@@ -273,30 +244,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-BTN-GROUP-03` — Sử dụng `row={false}` cho vertical layout (mặc định là horizontal)
 - `RULE-BTN-GROUP-04` — Không nest `ButtonGroup` bên trong `ButtonGroup` khác
 
-#### Calendar (`uikit-calendar`)
-
-- `RULE-CALENDAR-01` — `value` là `Dayjs | null` — không truyền Date, string, hay timestamp
-- `RULE-CALENDAR-02` — `onChange` nhận callback với 2 tham số — phải xử lý `options.isChangeTime`
-- `RULE-CALENDAR-03` — Sử dụng `min`/`max` là `Dayjs` để giới hạn khoảng ngày — không tự validate bên ngoài
-- `RULE-CALENDAR-04` — Bật `dateTime` để hiển thị TimeSelect — không tự build time picker bên ngoài
-- `RULE-CALENDAR-05` — Sử dụng `headerTextFormat` để tuỳ chỉnh hiển thị tháng/năm — không tự build header
-- `RULE-CALENDAR-06` — Sử dụng `disabledKeyboard` khi không muốn keyboard navigation
-- `RULE-CALENDAR-07` — `timeSelectProps` chỉ truyền khi `dateTime={true}`
-- `RULE-CALENDAR-08` — Calendar tự điều hướng đến tháng/năm của `value` — không cần tự quản lý
-
-#### Cascader (`uikit-cascader`)
-
-- `RULE-CASCADER-01` — Luôn truyền đủ 5 props bắt buộc — `value`, `onChange`, `options`, `getValue`, `getLabel`
-- `RULE-CASCADER-02` — Sử dụng `singleSelect` để chuyển sang chế độ chọn một — không tự quản lý logic single select
-- `RULE-CASCADER-03` — Option có `children` sẽ mở rộng cột con — không chọn trực tiếp
-- `RULE-CASCADER-04` — Sử dụng `fullWidth` thay vì override className cho chiều rộng
-- `RULE-CASCADER-05` — Sử dụng `error` kết hợp `helperText` cho validation — không tự thêm HelperText bên ngoài
-- `RULE-CASCADER-06` — Sử dụng `clearable` để hiển thị nút xoá — không tự build clear button
-- `RULE-CASCADER-07` — Sử dụng `searchable={false}` để tắt tìm kiếm — không ẩn bằng CSS
-- `RULE-CASCADER-08` — Sử dụng `renderOption` để tuỳ chỉnh hiển thị option — không override CSS nội bộ
-- `RULE-CASCADER-09` — `disabled` và `readOnly` có hành vi khác nhau — không nhầm lẫn
-- `RULE-CASCADER-10` — Sử dụng `renderTag` và `renderLimitTag` để tuỳ chỉnh tag — không tự build tag list bên ngoài
-
 #### Checkbox & CheckboxGroup (`uikit-checkbox`)
 
 - `RULE-CHECKBOX-01` — Pair `checked` với `onChange` trong controlled mode — omit `checked` cho uncontrolled
@@ -321,15 +268,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-CBXGRP-07` — Không tự wrap container div — CheckboxGroup đã render div với flex layout
 - `RULE-CBXGRP-08` — Generic type T được suy luận từ `value` — đảm bảo kiểu nhất quán
 
-#### CircularProgressBar (`uikit-circular-progress-bar`)
-
-- `RULE-CPB-01` — `percentage` là prop duy nhất bắt buộc — luôn truyền giá trị hợp lệ từ 0 đến 100
-- `RULE-CPB-02` — Khi bật `isUnlimited`, vòng tròn luôn hiển thị đầy và bỏ qua `percentage`
-- `RULE-CPB-03` — Luôn truyền `width` và `height` cùng giá trị để vòng tròn không bị méo
-- `RULE-CPB-04` — Sử dụng `classFontSize` để điều chỉnh kích thước chữ khi thay đổi kích thước vòng tròn
-- `RULE-CPB-05` — Sử dụng prop `color` để thay đổi màu thanh progress — không override qua CSS
-- `RULE-CPB-06` — Gradient ID `gradientStroke` là cố định — tránh render nhiều instance `isUnlimited`
-
 #### CKEditor (`uikit-ckeditor`)
 
 - `RULE-CKEDITOR-01` — Luôn truyền `value` và `onChange` — CKEditor là controlled component
@@ -337,7 +275,7 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-CKEDITOR-03` — Truyền đủ `uploadImageUrl` + `getUrlFromFileUploadResponse` để upload ảnh hoạt động
 - `RULE-CKEDITOR-04` — Cấu hình `autocompleteConfigs` đầy đủ `pattern` và `dataCallback` — không tự build autocomplete
 - `RULE-CKEDITOR-05` — Sử dụng ref `setTextValue` để chèn text — không truy cập DOM trực tiếp
-- `RULE-CKEDITOR-06` — Sử dụng `error` và `helperText` cho validation — không tự thêm HelperText bên ngoài
+- `RULE-CKEDITOR-06` — Sử dụng `error` và `helperText` cho validation — không tự thêm helper text bên ngoài
 - `RULE-CKEDITOR-07` — Sử dụng `stickyTopToolbar` khi editor nằm trong scrollable container
 - `RULE-CKEDITOR-08` — Sử dụng `disabledModules` để tắt toolbar items — không ẩn bằng CSS
 
@@ -349,16 +287,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-COLLAPSIBLE-04` — Không manually control visibility của children
 - `RULE-COLLAPSIBLE-05` — Pass `title` as `ReactNode` cho rich header content
 
-#### ColorPicker (`uikit-color-picker`)
-
-- `RULE-COLOR-PICKER-01` — Truyền `defaultValue` là màu hợp lệ — `onChangeColor` chỉ fire khi màu valid
-- `RULE-COLOR-PICKER-02` — Sử dụng `showCurrentColor` để hiển thị màu hiện tại làm background nút
-- `RULE-COLOR-PICKER-03` — Sử dụng `showReset` để hiện nút reset — không tự build reset bên ngoài
-- `RULE-COLOR-PICKER-04` — Sử dụng `showTransparent` khi cần hỗ trợ màu trong suốt
-- `RULE-COLOR-PICKER-05` — Sử dụng `isSelected` + `onClick` để quản lý selection trong danh sách màu
-- `RULE-COLOR-PICKER-06` — Sử dụng `children` để tuỳ chỉnh trigger — không wrap ColorPicker trong custom button
-- `RULE-COLOR-PICKER-07` — Sử dụng `width`/`height` để thay đổi kích thước nút — không override qua className
-
 #### ConfirmModal (`uikit-confirm-modal`)
 
 - `RULE-CONFIRM-01` — Sử dụng `ConfirmModal` cho tất cả destructive action confirmations, không bao giờ build custom
@@ -367,29 +295,11 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-CONFIRM-04` — Pass `message` as `ReactNode` cho rich content
 - `RULE-CONFIRM-05` — Customize `cancelText`/`confirmText` khi default text không rõ ràng
 
-#### CopyButton (`uikit-copy-button`)
-
-- `RULE-COPY-01` — Sử dụng `CopyButton` thay vì manual clipboard logic
-- `RULE-COPY-02` — Sử dụng `onClick` chỉ cho side effects, không phải cho clipboard logic
-- `RULE-COPY-03` — Sử dụng `showTooltip={false}` chỉ khi context đã communicate action rõ ràng
-- `RULE-COPY-04` — Không manually manage copied state bên ngoài component
-- `RULE-COPY-05` — Sử dụng props `icon`/`successIcon` để customize icons, không phải children
-
 #### CopyLinkButton (`uikit-copy-link-button`)
 
 - `RULE-COPYLINK-01` — Sử dụng `CopyLinkButton` thay vì tự xây dựng logic sao chép URL
 - `RULE-COPYLINK-02` — Truyền đường dẫn tương đối cho prop `link`, không truyền full URL
 - `RULE-COPYLINK-03` — Không tự quản lý trạng thái copied bên ngoài component
-- `RULE-COPYLINK-04` — Phân biệt `CopyButton` và `CopyLinkButton`
-
-#### CountrySelect (`uikit-country-select`)
-
-- `RULE-COUNTRY-SELECT-01` — Sử dụng mã ISO2 cho `value` và `countries` — không dùng tên quốc gia
-- `RULE-COUNTRY-SELECT-02` — Pair `value` với `onChange` cho controlled mode — omit `value` cho uncontrolled
-- `RULE-COUNTRY-SELECT-03` — Sử dụng `showDialCode` và `showCurrencyCode` để hiển thị thông tin bổ sung
-- `RULE-COUNTRY-SELECT-04` — Sử dụng `countries` để lọc danh sách — không tự filter options
-- `RULE-COUNTRY-SELECT-05` — Không override các props hardcoded — `searchable`, `showCheckIcon`, `getValue`, `getLabel`, `options`
-
 #### CreatedByInfo (`uikit-created-by-info`)
 
 - `RULE-CREATED-BY-01` — Sử dụng `isSystem` cho Automation Cogover, không phải manual markup
@@ -432,15 +342,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-DATE-RANGE-PICKER-08` — Sử dụng `helperText` và `error` cho thông báo lỗi
 - `RULE-DATE-RANGE-PICKER-09` — Sử dụng `getFromRef` và `getToRef` để truy cập input ref
 - `RULE-DATE-RANGE-PICKER-10` — Xoá giá trị bằng icon clear có sẵn — không tự build nút clear
-
-#### DateTimeWithTooltip (`uikit-date-time-with-tooltip`)
-
-- `RULE-DTWT-01` — `time` phải là timestamp (number) hoặc date string — không truyền Dayjs, Date object
-- `RULE-DTWT-02` — Không tự format ngày giờ + wrap Tooltip thủ công — sử dụng DateTimeWithTooltip
-- `RULE-DTWT-03` — Không cần kiểm tra `time` trước khi render — component tự trả về `null`
-- `RULE-DTWT-04` — Sử dụng spread HTMLAttributes để tuỳ chỉnh — không wrap thêm span/div
-- `RULE-DTWT-05` — Không tự xử lý logic AM/PM sang SA/CH — component tự chuyển đổi theo ngôn ngữ
-- `RULE-DTWT-06` — Không wrap DateTimeWithTooltip với Tooltip bên ngoài — tooltip đã tích hợp sẵn
 
 #### DraggableWrapper & DraggableItem (`uikit-draggable-wrapper`, `uikit-draggable-item`)
 
@@ -552,14 +453,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-HELP-04` — Sử dụng `popperProps` để override placement/offset, không re-wrap với Popper
 - `RULE-HELP-05` — Sử dụng `classNameContainer` để style popover box, không phải `className`
 
-#### HelperText (`uikit-helper-text`)
-
-- `RULE-HELPER-01` — Sử dụng `HelperText` cho tất cả form field helper/error/warning messages
-- `RULE-HELPER-02` — Sử dụng prop `color` cho semantic feedback, không bao giờ override color qua `className`
-- `RULE-HELPER-03` — Omit `color` cho neutral/secondary helper text
-- `RULE-HELPER-04` — Không thêm `mt-*` margin manually — `HelperText` đã có `mt-[4px]`
-- `RULE-HELPER-05` — Conditionally render `HelperText`, không pass empty string
-
 #### HorizontalSteps (`uikit-horizontal-steps`)
 
 - `RULE-HSTEPS-01` — `currentStep` là 0-based — không pass giá trị 1-based
@@ -626,14 +519,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-LAYOUT-SELECT-BTN-05` — Ẩn khi danh sách layout rỗng hoặc đang loading
 - `RULE-LAYOUT-SELECT-BTN-06` — Mỗi item trong `listLayouts` phải có `id` và `name` duy nhất
 
-#### LazyImage (`uikit-lazy-image`)
-
-- `RULE-LAZY-IMG-01` — Sử dụng `LazyImage` thay vì raw `<img>` cho tất cả images
-- `RULE-LAZY-IMG-02` — Sử dụng `fallbackSrc` cho graceful degradation khi image bị lỗi
-- `RULE-LAZY-IMG-03` — Không override attribute `loading` trừ khi image ở above-the-fold
-- `RULE-LAZY-IMG-04` — Pass `onError` chỉ cho side effects, không phải để swap src
-- `RULE-LAZY-IMG-05` — Không sử dụng `fallbackSrc` làm primary src
-
 #### LimitableList (`uikit-limitable-list`)
 
 - `RULE-LIMLIST-01` — Cung cấp `getItemWidth` khi `renderItem` trả về nội dung có chiều rộng khác text thuần
@@ -654,15 +539,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-LIST-VIEW-TABLE-07` — Kết hợp ListViewTable với TableSettings đúng cách qua render props pattern
 - `RULE-LIST-VIEW-TABLE-08` — Không truyền Table props vào sai vị trí — tất cả Table props truyền trực tiếp vào ListViewTable
 
-#### MarkdownPreview (`uikit-markdown-preview`)
-
-- `RULE-MDP-01` — Truyền nội dung markdown qua prop `content`, không dùng `dangerouslySetInnerHTML`
-- `RULE-MDP-02` — Luôn đảm bảo `content` không phải `null` hoặc `undefined`
-- `RULE-MDP-03` — Sử dụng `className` để tuỳ chỉnh style container
-- `RULE-MDP-04` — Sử dụng prop `style` cho các giá trị động
-- `RULE-MDP-05` — Không tự cài đặt `react-markdown` khi đã có `MarkdownPreview`
-- `RULE-MDP-06` — Phân biệt khi nào dùng `MarkdownPreview` và `RenderRichEditorValue`
-
 #### Modal (`uikit-modal`)
 
 - `RULE-MODAL-01` — Conditionally render `<Modal>` để open/close — không có prop `open`/`visible`
@@ -673,32 +549,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-MODAL-06` — Không explicitly pass default values cho `triggerEscPress` và `hideOnClickOutside`
 - `RULE-MODAL-07` — Sử dụng `fixedHeight` chỉ khi modal body phải luôn fill viewport height
 - `RULE-MODAL-08` — Sử dụng `placement` cho corner-anchored modals, không phải manual `className` positioning
-
-#### Pagination (`uikit-pagination`)
-
-- `RULE-PAGINATION-01` — Sử dụng `disabledPrev`/`disabledNext` chỉ khi cần override logic mặc định
-- `RULE-PAGINATION-02` — Tuỳ chỉnh text hiển thị qua prop `text`, không tự render bên ngoài
-- `RULE-PAGINATION-03` — Sử dụng `perPageOptions` để tuỳ chỉnh danh sách lựa chọn
-- `RULE-PAGINATION-04` — Sử dụng `hideNextPrev` và `hidePerPage` để ẩn phần tử, không dùng CSS
-- `RULE-PAGINATION-05` — Luôn truyền `perPage` khi sử dụng `onChangePerPage`
-
-#### PersonnelDetailCard (`uikit-personnel-detail-card`)
-
-- `RULE-PDC-01` — Truyền `personnelId` để component tự gọi API lấy thông tin nhân sự
-- `RULE-PDC-02` — Sử dụng `PersonnelDetailPopper` hoặc Avatar prop thay vì tự wrap Popper
-- `RULE-PDC-03` — Sử dụng `isSystemUser` cho tài khoản hệ thống Automation Cogover
-- `RULE-PDC-04` — Sử dụng `isShow` để điều khiển hiển thị
-- `RULE-PDC-05` — Truyền `popperProps` qua PersonnelDetailPopper để tuỳ chỉnh vị trí
-- `RULE-PDC-06` — Không tự tạo card thông tin nhân sự bằng HTML/CSS
-
-#### PersonnelDetailPopper (`uikit-personnel-detail-popper`)
-
-- `RULE-PDP-01` — Luôn truyền `personnelId` để popup có dữ liệu hiển thị
-- `RULE-PDP-02` — Truyền `isSystemUser={true}` khi nhân sự là tài khoản hệ thống
-- `RULE-PDP-03` — Sử dụng `popperProps` để tuỳ chỉnh Popper, không tự wrap
-- `RULE-PDP-04` — `children` phải là React element có thể nhận DOM events
-- `RULE-PDP-05` — Khi dùng trong Avatar, sử dụng prop `id` thay vì tự wrap PersonnelDetailPopper
-- `RULE-PDP-06` — Không override các prop mặc định của Popper trừ khi có lý do cụ thể
 
 #### Popper (`uikit-popper`)
 
@@ -713,16 +563,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-POPPER-09` — Sử dụng `appendTo` khi popper bị clipped bởi `overflow: hidden`
 - `RULE-POPPER-10` — Sử dụng `isFixed` khi anchor element có `position: fixed`
 
-#### PopperRecordInfo (`uikit-popper-record-info`)
-
-- `RULE-PRI-01` — Luôn truyền `objectSlug` và `recordId` — đây là hai props bắt buộc
-- `RULE-PRI-02` — Sử dụng `onClickViewDetail` thay vì tự xử lý điều hướng
-- `RULE-PRI-03` — Sử dụng `width` và `height` (số, đơn vị px) để tùy chỉnh kích thước popup
-- `RULE-PRI-04` — Sử dụng `layoutId` khi cần hiển thị layout cụ thể
-- `RULE-PRI-05` — Không tự tạo Popper hiển thị thông tin record — sử dụng PopperRecordInfo
-- `RULE-PRI-06` — Có thể truyền thêm các props của Popper (ngoại trừ `render`)
-- `RULE-PRI-07` — Sử dụng render prop pattern của `children` giống như Popper
-
 #### ResizeBar (`uikit-resize-bar`)
 
 - `RULE-RESIZE-01` — Luôn pass current `width` state vào prop `width`
@@ -731,14 +571,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-RESIZE-04` — Chọn `placement` dựa trên panel ở phía nào
 - `RULE-RESIZE-05` — Luôn set `minWidth` và `maxWidth` để tránh extreme sizes
 - `RULE-RESIZE-06` — Không manually re-implement resize logic với `onResizeStart`/`onResizeEnd`
-
-#### Show (`uikit-show`)
-
-- `RULE-SHOW-01` — Sử dụng `Show` thay vì toán tử `&&` hoặc ternary cho conditional rendering
-- `RULE-SHOW-02` — Sử dụng prop `fallback` thay vì đặt `Show` trong ternary
-- `RULE-SHOW-03` — Sử dụng render function khi cần giá trị `when` đã được thu hẹp kiểu
-- `RULE-SHOW-04` — Không lồng nhiều `Show` khi có thể gộp điều kiện
-- `RULE-SHOW-05` — Không truyền `fallback={null}` — đây là giá trị mặc định
 
 #### Skeleton (`uikit-skeleton`)
 
@@ -754,13 +586,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-SMTTP-02` — Attach `getRef` vào overflowing element, không phải wrapper
 - `RULE-SMTTP-03` — Sử dụng `multipleLines` cho `line-clamp` text
 - `RULE-SMTTP-04` — `children` là render prop `({ getRef }) => ReactElement`
-
-#### Spinner (`uikit-spinner`)
-
-- `RULE-SPINNER-01` — Sử dụng `SpinnerComponent` thay vì tự tạo spinner
-- `RULE-SPINNER-02` — Không thêm `animate-spin` vào `className` — animation đã tích hợp sẵn
-- `RULE-SPINNER-03` — Tuỳ chỉnh kích thước bằng `className` với `w-*` và `h-*`
-- `RULE-SPINNER-04` — Khi dùng trong Button, sử dụng prop `loading` thay vì chèn Spinner thủ công
 
 #### StepProgressBar (`uikit-step-progress-bar`)
 
@@ -847,23 +672,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-TAG-05` — Sử dụng `iconClose` chỉ để replace default × icon — dùng `showDeleteIcon={false}` để hide button
 - `RULE-TAG-06` — `disabled` làm tag non-interactive — không combine với `onClick`
 
-#### ToastMessage (`uikit-toast-message`)
-
-- `RULE-TOAST-01` — Mount `ToastContainer` chỉ một lần tại app root — không bao giờ inside page component
-- `RULE-TOAST-02` — Sử dụng `showToastMessage` để trigger toasts — không bao giờ render `ToastMessage` trực tiếp
-- `RULE-TOAST-03` — Match `placement` trong `showToastMessage` với mounted `ToastContainer`
-- `RULE-TOAST-04` — Sử dụng `type` để communicate semantic meaning — không dùng `"default"` cho feedback messages
-- `RULE-TOAST-05` — `showToastMessage` có thể được gọi outside React — không cần context hoặc hook
-- `RULE-TOAST-06` — Sử dụng `showBrowserNotification` cho native OS notifications — không phải replacement cho toasts
-
-#### ToggleCollapseButton (`uikit-toggle-collapse-button`)
-
-- `RULE-TCB-01` — Luôn truyền `isCollapsed` để đồng bộ hướng icon chevron
-- `RULE-TCB-02` — Chọn `placement` phù hợp với vị trí đặt button
-- `RULE-TCB-03` — Chọn `variant` phù hợp với ngữ cảnh giao diện
-- `RULE-TCB-04` — Không tự render icon chevron bên ngoài component
-- `RULE-TCB-05` — Sử dụng `className` để tuỳ chỉnh vị trí, không override kích thước
-
 #### Tooltip (`uikit-tooltip`)
 
 - `RULE-TTP-01` — Children phải là một React element duy nhất
@@ -886,13 +694,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-VSTEPS-03` — Luôn set `isCanClick` khi provide `onClickStep` — omit cả hai khi navigation bị disabled
 - `RULE-VSTEPS-04` — `VerticalSteps` có fixed dimensions — sử dụng `className` để override cho non-standard layouts
 - `RULE-VSTEPS-05` — Giữ length của `stepLabels` ổn định — không conditionally add hoặc remove steps
-
-#### useResponsive (`uikit-use-responsive`)
-
-- `RULE-RESP-01` — Sử dụng `isMobileDevice` cho touch detection, `isMobile` cho viewport width
-- `RULE-RESP-02` — Sử dụng `isMaxWidth(n)` cho custom breakpoints
-- `RULE-RESP-03` — Không bao giờ viết `window.innerWidth` comparisons trực tiếp
-- `RULE-RESP-04` — Auth layouts sử dụng `isAuthDesktop`/`isAuthTablet`
 
 ### Form Components
 
@@ -1223,14 +1024,6 @@ Tham khảo các hướng dẫn này khi:
 - `RULE-URL-08` — Popper display text tự động bị vô hiệu hóa khi `disabled` hoặc `readOnly`
 
 ### Hooks
-
-#### useConvertPageSettings (`uikit-use-convert-page-settings`)
-
-- `RULE-CPS-01` — Luôn truyền `pageSettings` — đây là prop bắt buộc duy nhất
-- `RULE-CPS-02` — Sử dụng `fromModal={true}` khi render trong modal — hook trả về styles rỗng
-- `RULE-CPS-03` — Sử dụng `editMode` để phân biệt breadcrumb giữa create và edit mode
-- `RULE-CPS-04` — Không tự parse JSON hoặc tính toán CSS từ page settings
-- `RULE-CPS-05` — Áp dụng `settingPageStyles` cho container ngoài, `settingContentPageStyles` cho content
 
 #### useForceUpdate (`uikit-use-force-update`)
 

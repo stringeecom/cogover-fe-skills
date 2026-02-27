@@ -1,5 +1,5 @@
 ---
-title: Cách sử dụng hook useMergeRefs trong ui-kit
+title: Cách sử dụng hook useMergedRefs trong ui-kit
 impact: MEDIUM
 impactDescription: Hook merge nhiều refs vào một — tự xử lý ref forwarding sẽ bỏ sót function refs hoặc object refs
 tags: hook, ref, merge, forward, callback-ref, ui-kit

@@ -1,6 +1,6 @@
 ---
 name: cogover-fe
-description: Skill tổng hợp cho dự án Cogover Frontend. Bao gồm 3 phần chính - (1) UI Kit với foundations (design tokens, màu sắc, typography, spacing, cx utility), common components, form components, và hooks; (2) Create Commit - tạo git commit tuân theo quy ước commit message của Cogover; (3) i18n - dịch text tiếng Việt sang đa ngôn ngữ. Sử dụng khi viết/review code UI, tạo commit, hoặc dịch i18n.
+description: Cogover Frontend UI Kit (components, forms, hooks, design tokens), commit convention, i18n. Use when writing/reviewing UI code, creating commits, or translating text.
 license: MIT
 metadata:
   author: cogover

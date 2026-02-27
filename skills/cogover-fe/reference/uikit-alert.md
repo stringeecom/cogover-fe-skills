@@ -1,173 +1,74 @@
----
-title: Cách sử dụng Alert Component của ui-kit
-impact: MEDIUM
-impactDescription: Sử dụng Alert sai dẫn đến việc hiển thị icon dư thừa, variant không phù hợp và custom class không đúng chỗ
-tags: alert, warning, info, notification, ui-kit
----
+## Alert Component (`uikit-alert`)
 
-## Cách sử dụng Alert Component của ui-kit
+Đường dẫn: `ui-kit/src/components/Alert`
 
-Đường dẫn component: `ui-kit/src/components/Alert`
+Props: `title`, `message`, `icon`, `variant` ("warning"|"info"), `className`, `messageClassName`, `titleClassName`.
 
-Props: `title`, `message`, `icon`, `variant`, `className`, `messageClassName`, `titleClassName`.
+| Variant | Background | Border left | Dùng cho |
+|---------|-----------|-------------|----------|
+| `warning` (mặc định) | `bg-secondary-light-95` | `bg-secondary-main` | Cảnh báo, lưu ý quan trọng |
+| `info` | `bg-blue-50` | `bg-info` | Thông tin bổ sung, hướng dẫn |
 
 ---
 
-### RULE-ALERT-01: Sử dụng `variant` phù hợp với ngữ cảnh thông báo
-
-Alert hỗ trợ 2 variant: `"warning"` (mặc định) và `"info"`. Sử dụng `"warning"` cho các cảnh báo, lưu ý quan trọng. Sử dụng `"info"` cho các thông tin bổ sung, hướng dẫn.
-
-**Sai:**
+### RULE-ALERT-01: Chọn `variant` phù hợp với ngữ cảnh
 
 ```tsx
-// ❌ Dùng variant warning cho thông tin hướng dẫn thông thường
-<Alert
-  variant="warning"
-  message="Vui lòng chọn template để xuất file"
-/>
-```
+// ❌ Warning cho thông tin hướng dẫn thông thường
+<Alert variant="warning" message="Vui lòng chọn template để xuất file" />
 
-**Đúng:**
-
-```tsx
-// ✅ Dùng variant info cho thông tin hướng dẫn
-<Alert
-  variant="info"
-  message="Vui lòng chọn template để xuất file"
-/>
-
-// ✅ Dùng variant warning (hoặc bỏ qua vì là mặc định) cho cảnh báo
-<Alert
-  title="Thông báo"
-  message="Số lượng bản ghi đã vượt quá giới hạn cho phép"
-/>
+// ✅
+<Alert variant="info" message="Vui lòng chọn template để xuất file" />
+<Alert title="Thông báo" message="Số lượng bản ghi đã vượt quá giới hạn" />  // warning là mặc định
 ```
 
 ---
 
-### RULE-ALERT-02: Không truyền rõ ràng giá trị mặc định cho `variant` và `icon`
-
-`variant` mặc định là `"warning"` và `icon` mặc định là icon cảnh báo (tam giác vàng). Chỉ truyền khi cần thay đổi giá trị mặc định.
-
-**Sai:**
+### RULE-ALERT-02: Không truyền rõ ràng giá trị mặc định
 
 ```tsx
-// ❌ Thừa — variant và icon đã có giá trị mặc định
-<Alert
-  variant="warning"
-  icon={<WarningIcon />}
-  message="Đây là cảnh báo"
-/>
-```
+// ❌ Thừa
+<Alert variant="warning" icon={<WarningIcon />} message="Đây là cảnh báo" />
 
-**Đúng:**
-
-```tsx
-// ✅ Bỏ qua khi dùng giá trị mặc định
+// ✅
 <Alert message="Đây là cảnh báo" />
-
-// ✅ Chỉ truyền khi cần thay đổi
 <Alert variant="info" message="Thông tin bổ sung" />
 ```
 
 ---
 
-### RULE-ALERT-03: Truyền `icon={null}` để ẩn icon, không truyền icon rỗng
-
-Khi không muốn hiển thị icon, truyền `icon={null}`. Không truyền chuỗi rỗng hoặc fragment rỗng.
-
-**Sai:**
+### RULE-ALERT-03: Truyền `icon={null}` để ẩn icon hoàn toàn
 
 ```tsx
-// ❌ Fragment rỗng vẫn render wrapper của icon
+// ❌ Fragment/string rỗng vẫn render wrapper icon
 <Alert icon={<></>} message="Thông báo" />
 
-// ❌ Chuỗi rỗng vẫn render wrapper của icon
-<Alert icon="" message="Thông báo" />
-```
-
-**Đúng:**
-
-```tsx
-// ✅ null sẽ ẩn hoàn toàn phần icon
-<Alert icon={null} variant="info" message="Vui lòng chọn template để xuất file" />
+// ✅
+<Alert icon={null} variant="info" message="Vui lòng chọn template" />
 ```
 
 ---
 
-### RULE-ALERT-04: Sử dụng `title` khi cần phân biệt tiêu đề và nội dung chi tiết
-
-`title` là optional. Chỉ sử dụng khi cần hiển thị tiêu đề in đậm phía trên nội dung message. Khi có `title`, layout sẽ không căn giữa theo chiều dọc nữa và message sẽ có khoảng cách phía trên.
-
-**Sai:**
+### RULE-ALERT-04: Dùng `title` khi cần phân cấp tiêu đề/nội dung
 
 ```tsx
-// ❌ Đặt tiêu đề vào message — mất phân cấp thông tin
+// ❌ Đặt tiêu đề vào message — mất phân cấp
 <Alert message={<><strong>Thông báo</strong>: Số lượng bản ghi đã vượt quá giới hạn</>} />
-```
 
-**Đúng:**
-
-```tsx
-// ✅ Sử dụng title để phân cấp thông tin rõ ràng
-<Alert
-  title="Thông báo"
-  message="Số lượng bản ghi đã vượt quá giới hạn cho phép"
-/>
-
-// ✅ Chỉ có message khi không cần tiêu đề
-<Alert message="Lưu ý: Hành động này không thể hoàn tác" />
+// ✅
+<Alert title="Thông báo" message="Số lượng bản ghi đã vượt quá giới hạn cho phép" />
 ```
 
 ---
 
-### RULE-ALERT-05: Sử dụng `messageClassName` và `titleClassName` để tuỳ chỉnh style, không override bằng `className`
-
-`className` áp dụng cho container ngoài cùng. Khi cần tuỳ chỉnh style của nội dung message hoặc title, sử dụng `messageClassName` và `titleClassName` tương ứng.
-
-**Sai:**
+### RULE-ALERT-05: Dùng `messageClassName`/`titleClassName` để tuỳ chỉnh style nội dung
 
 ```tsx
-// ❌ Override style message qua className của container
-<Alert
-  className="[&>div>div:last-child]:text-red-500"
-  message="Lỗi xảy ra"
-/>
+// ❌ Override qua className container — không đúng cách
+<Alert className="[&>div>div:last-child]:text-red-500" message="Lỗi xảy ra" />
+
+// ✅
+<Alert messageClassName={cx("text-danger")} message="Lỗi xảy ra" />
+<Alert titleClassName={cx("text-danger")} title="Lỗi" message="Không thể lưu dữ liệu" />
+<Alert className={cx("mt-[1rem]")} message="Lưu ý quan trọng" />  // className cho container
 ```
-
-**Đúng:**
-
-```tsx
-// ✅ Sử dụng messageClassName để tuỳ chỉnh style message
-<Alert
-  messageClassName={cx("text-danger")}
-  message="Lỗi xảy ra"
-/>
-
-// ✅ Sử dụng titleClassName để tuỳ chỉnh style title
-<Alert
-  titleClassName={cx("text-danger")}
-  title="Lỗi"
-  message="Không thể lưu dữ liệu"
-/>
-
-// ✅ Sử dụng className cho container (ví dụ: thêm margin)
-<Alert
-  className={cx("mt-[1rem]")}
-  message="Lưu ý quan trọng"
-/>
-```
-
----
-
-## Tham chiếu style
-
-| Variant | Background | Border left |
-|---------|-----------|-------------|
-| `warning` | `bg-secondary-light-95` | `bg-secondary-main` |
-| `info` | `bg-blue-50` | `bg-info` |
-
-| Phần tử | Typography class |
-|---------|-----------------|
-| Title | `prose-body1 text-typo-primary` |
-| Message | `prose-caption2 text-typo-secondary` |

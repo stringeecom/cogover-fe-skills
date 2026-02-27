@@ -34,12 +34,22 @@ Hook: `ui-kit/src/components/Table/hooks/useTableV2`
 |---|---|
 | `key` | Unique, đồng thời là path lấy giá trị |
 | `label` | Header text/node |
+| `renderLabel` | `(column) => ReactNode` — custom header render |
 | `render` | `(record, index, dataSource, params) => ReactNode` |
+| `align` | `"left"` \| `"center"` \| `"right"` — mặc định `"left"` |
 | `width` | `number` (pixel) |
 | `minWidth` | `number` (pixel) |
+| `fullWidth` | `boolean` — cột chiếm toàn bộ chiều rộng còn lại |
 | `sortable` | `boolean` |
 | `autoFillWidth` | `boolean` — co giãn fill space |
 | `paddingX` | `number` — mặc định 12px |
+| `helpText` | `string` — tooltip icon bên cạnh header |
+| `tooltip` | `string \| ((record) => string)` — tooltip cho cell |
+| `rowSpan` | `(record, index) => number` — gộp hàng |
+| `colSpan` | `(record, index) => number` — gộp cột |
+| `disabled` | `(record) => boolean` — disable tương tác cell |
+| `cellAttributes` | `(record, index) => HTMLAttributes<HTMLTableCellElement>` |
+| `styles.backgroundColor` | `(record) => string` — màu nền cell |
 | `canHide` | `boolean` — dùng với TableSettings |
 | `canChangePosition` | `boolean` — dùng với TableSettings |
 

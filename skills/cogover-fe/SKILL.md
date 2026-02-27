@@ -30,6 +30,13 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 - Không tự tạo git commit trừ khi user yêu cầu
 - Tách task độc lập → sub agent song song
 
+### Styling Foundations (BẮT BUỘC khi viết UI):
+- **Colors** → dùng configured tokens (`text-primary-main`, `bg-surface-default`), KHÔNG raw hex/rgb/Tailwind default (`bg-blue-500`)
+- **Spacing** → dùng `rem` (`p-[1rem]`, `gap-[0.5rem]`), KHÔNG `px` (`p-[16px]`). Quy đổi: 1rem = 16px
+- **Typography** → dùng `prose-*` classes (`prose-body2`, `prose-h2`), KHÔNG `text-[14px] font-semibold`
+- **className** → dùng `cx()` với grouped args theo concern, KHÔNG string concat/template literals
+- **Tokens** → kiểm tra `tailwind.config.js` trước, KHÔNG hardcode values
+
 ## Reference Files
 
 ### Foundation & Workflow

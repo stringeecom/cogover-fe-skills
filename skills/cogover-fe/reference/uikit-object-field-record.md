@@ -2,7 +2,7 @@
 title: Kiến thức về Object, Field, Record
 impact: HIGH
 impactDescription: Hiểu sai mô hình dữ liệu Object-Field-Record dẫn đến truy vấn sai, hiển thị sai, và lỗi permission
-tags: object, field, record, data-model, api, hook
+tags: object, field, record, related-list, data-model, api, hook
 ---
 
 ## Kiến thức về Object, Field, Record
@@ -108,7 +108,94 @@ Tất cả hook record đều nằm trong `ui-kit/src/apis/record/record.api.ts`
 | `useSyncRecord` | Đồng bộ dữ liệu giữa các record | `SyncRecordParams` |
 | `useMergeRecords` | Gộp nhiều record | `MergeRecordPayload` |
 
-### RULE-OFR-07: Kiểm tra quyền xem/sửa field trước khi hiển thị
+### RULE-OFR-07: Related List
+
+#### Khái niệm
+
+Khi một trường `reference` hoặc `lookup_normal` (gọi chung là **trường lookup**) được tạo trong **object A**, thì ở **object B** (object được trường lookup đó tham chiếu đến) sẽ **tự động tạo ra một related list** tương ứng nằm ở object B.
+
+#### Lấy danh sách Related List của một Object
+
+Gọi API lấy chi tiết object B và truyền thêm tham số `withRelatedList = 1`:
+
+```typescript
+// Ví dụ: lấy chi tiết object B kèm related list
+const { object } = useGetDataFieldBySlug({
+  objectSlug: "objectB_slug",
+  // ... các params khác
+});
+// Truyền thêm withRelatedList = 1 trong API call để nhận được danh sách related list
+```
+
+#### Cấu trúc Related List
+
+Mỗi related list có các key quan trọng sau:
+
+| Key | Mô tả |
+|-----|--------|
+| `id` | ID của related list |
+| `name` | Tên hiển thị của related list |
+| `slug` | Slug định danh của related list |
+| `sourceObjectSlug` | Slug của **object A** (object chứa trường lookup) |
+| `sourceFieldSlug` | Slug của **trường lookup** trong object A |
+
+#### Lấy danh sách bản ghi của Related List
+
+Thực hiện theo 3 bước:
+
+**Bước 1**: Lấy chi tiết related list từ object B (với `withRelatedList = 1` như trên).
+
+**Bước 2**: Lấy chi tiết field lookup dựa vào `sourceObjectSlug` và `sourceFieldSlug`.
+
+**Bước 3**: Dùng API lấy danh sách bản ghi với filter phù hợp. Filter sử dụng cấu trúc `FilterGeneratorItem` (xem `FilterGenerator/type.ts`):
+
+```typescript
+interface FilterGeneratorItem {
+  field: string | null;  // slug của field cần filter
+  op: Operator | null;   // toán tử: "=", "in", "!=", "is null", ...
+  params: FilterParamsType; // giá trị filter
+}
+```
+
+**Cách xây dựng filter phụ thuộc vào loại field lookup**:
+
+- **Nếu field lookup là `lookup_normal`**: `field` = `sourceFieldSlug`
+- **Nếu field lookup là `reference`**: `field` = `<sourceFieldSlug>.id`
+
+```typescript
+// Ví dụ: Object A = "Đơn hàng" có trường lookup "customer" (reference) tham chiếu đến Object B = "Khách hàng"
+// → Object B "Khách hàng" sẽ có related list với sourceFieldSlug = "customer"
+// → Lấy bản ghi related list cho khách hàng có id = "customer-123"
+
+const isLookupNormal = lookupField?.fieldType === "lookup_normal";
+const recordBId = "customer-123";
+
+// Filter lấy các bản ghi thuộc related list
+const filters: FilterGeneratorItem[] = [
+  {
+    field: isLookupNormal ? "customer" : "customer.id",
+    op: "=",
+    params: recordBId,
+  },
+];
+
+// Nếu field lookup cho phép nhiều giá trị (multiple), dùng operator "in":
+const filtersMultiple: FilterGeneratorItem[] = [
+  {
+    field: isLookupNormal ? "customer" : "customer.id",
+    op: "in",
+    params: [recordBId],
+  },
+];
+
+// Truyền filters vào useFilterRecord hoặc useInfinityRecord
+const { data } = useFilterRecord({
+  object_slug: relatedList.sourceObjectSlug, // "order"
+  filters,
+});
+```
+
+### RULE-OFR-08: Kiểm tra quyền xem/sửa field trước khi hiển thị
 
 Khi hiển thị hoặc cho phép chỉnh sửa field trong record, phải kiểm tra `_canNotViewColumns` và `_canNotUpdateColumns`:
 

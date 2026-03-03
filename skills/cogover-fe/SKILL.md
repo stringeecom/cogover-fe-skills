@@ -61,6 +61,6 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 `uikit-use-force-update` · `uikit-use-get-data-field-by-slug` · `uikit-use-get-data-field-option-label` · `uikit-use-get-field-label` · `uikit-use-get-layout` · `uikit-use-get-record-page-link` · `uikit-use-get-state-from-search-params` · `uikit-use-histories-state` · `uikit-use-merge-record-filters` · `uikit-use-merged-refs` · `uikit-use-replace-record-value` · `uikit-use-save-to-search-params` · `uikit-use-sync-state`
 
 ### Notifications & Toast
-`showToastMessage` → xem trong bất kỳ reference file component nào
+`uikit-toast-message` — ToastContainer, ToastMessage, showToastMessage, showBrowserNotification (7 rules: RULE-TOAST-01→07)
 
 > Path: `{skill_base_dir}/reference/<name>.md`

@@ -15,6 +15,7 @@ Nút mở modal chọn data field. Kế thừa props từ `InsertFieldObjectV2Pr
 | `selectedDataField` | — | `null` | Tự lọc field tương thích |
 | `checkSelectableField` | — | — | `(field) => boolean \| { selectable, hide }` |
 | `filterDataField` | — | `() => true` | Loại field khỏi tree |
+| `ignoreMultiple` | — | `false` | Bỏ qua kiểm tra multiple khi dùng filter mặc định |
 | `maxLevel` | — | `5` | Giới hạn độ sâu |
 | `description` | — | i18n text | Mô tả trong modal |
 
@@ -26,6 +27,8 @@ rootObjects={[
   { slug: "contact", variableSlug: "$contact" },
   { slug: "currentTime", variableSlug: "$currentTime", isAdditionalOption: true },  // không query API
   { slug: "contact", variableSlug: "$contact", renderName: (obj) => obj?.name ?? "Khách hàng" },
+  { slug: "contact", variableSlug: "$contact", isRootSelectable: true },  // cho phép chọn root
+  { slug: "contact", variableSlug: "$relatedList", isRelatedList: true },  // hiển thị related lists
 ]}
 ```
 

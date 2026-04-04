@@ -1,6 +1,6 @@
 ---
 name: cogover-fe
-description: Cogover Frontend UI Kit (components, forms, hooks, design tokens), commit convention, i18n. Use when writing/reviewing UI code, creating commits, or translating text.
+description: Cogover Frontend UI Kit (components, forms, hooks, design tokens), commit convention, i18n, unit test. Use when writing/reviewing UI code, creating commits, translating text, or writing unit tests.
 license: MIT
 metadata:
   author: cogover
@@ -62,5 +62,8 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 
 ### Notifications & Toast
 `uikit-toast-message` — ToastContainer, ToastMessage, showToastMessage, showBrowserNotification (7 rules: RULE-TOAST-01→07)
+
+### Unit Testing
+`uikit-unit-test` — Vitest + React Testing Library + MSW. Patterns cho pure functions (.test.ts), hooks (renderHook), components (render + userEvent). Mock API via MSW handlers, test utilities (renderComponent, renderWrapper), coverage priority files
 
 > Path: `{skill_base_dir}/reference/<name>.md`

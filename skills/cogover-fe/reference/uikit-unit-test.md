@@ -432,7 +432,8 @@ Tất cả component con và hàm nội bộ trong component đang test phải *
 - Component con trong cùng project (`src/components/*`, `src/pages/*`)
 - Hàm helper/util nội bộ (`src/utils/*`, local helpers)
 - Hooks nội bộ (`src/hooks/*`, local hooks) — trừ khi hook đó gọi API thì mock ở tầng API
-- Component từ `@stringeecom/ui-kit`, `@fortawesome` — render thật
+- Component từ `@stringeecom/ui-kit` — render thật
+- **`@fortawesome/*` (CRITICAL)**: KHÔNG mock `@fortawesome/react-fontawesome`, `@fortawesome/pro-light-svg-icons`, `@fortawesome/pro-regular-svg-icons`, `@fortawesome/pro-solid-svg-icons`, `@fortawesome/fontawesome-svg-core`. FontAwesome components và icons phải render thật. Nếu test fail do FontAwesome → sửa test setup, KHÔNG mock FontAwesome.
 
 ```typescript
 // ❌ SAI: Mock component con
@@ -531,6 +532,7 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Test cả happy path và edge cases (null, undefined, empty array, etc.)
 - [ ] Không dùng `any` type trong test code
 - [ ] KHÔNG mock component con — render thật toàn bộ tree, chỉ mock API và `cogover-comm-web-sdk`
+- [ ] KHÔNG mock `@fortawesome/*` — FontAwesome icons và components phải render thật
 - [ ] Kiểm tra component con đã có test chưa trước khi viết → tránh duplicate
 - [ ] Dùng `userEvent` cho user interaction, KHÔNG dùng `fireEvent`
 - [ ] Mock API bằng MSW handler, KHÔNG dùng `vi.mock('src/apis/...')`

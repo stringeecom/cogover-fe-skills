@@ -469,9 +469,78 @@ renderComponent(<ParentPage />);
 
 **Mục tiêu: mỗi file test phải đạt >= 90% coverage lines cho file source tương ứng.**
 
-- Sau khi viết xong test, chạy `npm run coverage --run` để kiểm tra
-- Nếu chưa đạt 90%, bổ sung test cases cho các nhánh chưa cover (if/else, early return, error handling, edge cases)
 - Ưu tiên cover: happy path → error/edge cases → conditional branches → fallback values
+- Nếu chưa đạt 90%, bổ sung test cases cho các nhánh chưa cover (if/else, early return, error handling, edge cases)
+
+### Workflow tiết kiệm token khi chạy test & coverage
+
+**Quy tắc cốt lõi: KHÔNG bao giờ chạy nguyên suite test/coverage rồi đọc full output. Luôn filter theo đúng 1 file test + 1 file source cần quan tâm, và dùng reporter gọn nhất.**
+
+Output mặc định của vitest/coverage rất dài (hàng trăm file, console.log, stack trace...) → ngốn context cực nhanh. Dùng 3 bước sau:
+
+#### Bước 1: Chạy test cho đúng file → biết pass/fail
+
+```bash
+npm run test --run src/__test__/path/to/file.test.tsx --reporter=dot 2>&1 | tail -30
+```
+
+- `--reporter=dot`: mỗi test chỉ 1 ký tự `.` hoặc `x` → output rất ngắn
+- `tail -30`: chỉ lấy phần summary cuối (pass/fail count, duration)
+- Nếu có test fail → chạy lại và grep chi tiết lỗi:
+
+```bash
+npm run test --run src/__test__/path/to/file.test.tsx 2>&1 > /tmp/test.log
+grep -nE "FAIL|✗|Error|Expected|Received|AssertionError" /tmp/test.log | head -50
+```
+
+#### Bước 2: Chạy coverage CHỈ cho 1 file source (KEY TRICK)
+
+```bash
+npm run coverage -- --run src/__test__/path/to/file.test.tsx \
+  --coverage.include='src/path/to/file.ts' \
+  --coverage.reporter=text \
+  --coverage.reporter=json-summary 2>&1 | tail -20
+```
+
+- `--coverage.include='src/path/to/file.ts'`: chỉ tính coverage đúng 1 file → text reporter in **duy nhất 1 dòng** bảng kết quả
+- Cột `Uncovered Line #s` → **danh sách chính xác line nào chưa được cover**
+- `json-summary` reporter đồng thời ghi `coverage/coverage-summary.json` (nhỏ, dễ parse)
+
+Output mẫu (~10 dòng):
+
+```
+File          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+--------------|---------|----------|---------|---------|------------------
+ file.ts      |  72.5   |   60.0   |   80.0  |   71.4  | 45-52,78,99-103
+```
+
+#### Bước 3: Đọc đúng đoạn code chưa cover → viết thêm test
+
+Dựa vào `Uncovered Line #s`, dùng `Read` với `offset/limit` để đọc đúng vùng code:
+
+```
+Read src/path/to/file.ts offset=45 limit=10
+Read src/path/to/file.ts offset=99 limit=8
+```
+
+Từ đó hiểu branch/logic chưa test → thêm test case → quay lại Bước 1.
+
+#### Khi cần chi tiết hơn (branch coverage)
+
+Nếu text reporter không đủ (ví dụ branch ẩn), đọc nhanh `coverage-summary.json`:
+
+```bash
+jq '."src/path/to/file.ts"' coverage/coverage-summary.json
+```
+
+→ object nhỏ dạng `{ lines: { pct, total, covered, skipped }, branches: {...}, functions: {...}, statements: {...} }`.
+
+#### Anti-patterns (KHÔNG làm)
+
+- ❌ `npm run test` (chạy nguyên suite) → output hàng nghìn dòng
+- ❌ `npm run coverage` không có `--coverage.include` → in bảng của **toàn bộ** file trong project
+- ❌ Đọc file `coverage/coverage-final.json` full → quá lớn, dùng `coverage-summary.json`
+- ❌ Đọc full `/tmp/test.log` bằng `Read` không offset → dùng `Grep` hoặc `tail` để lấy phần cần
 
 ## Mock Data (BẮT BUỘC)
 
@@ -539,8 +608,8 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Mock data viết đầy đủ theo type, KHÔNG dùng `as unknown as Type`
 - [ ] Mock data constants đặt trong `src/__mocks__/` để tái sử dụng
 - [ ] Đạt >= 90% coverage lines cho mỗi file source
-- [ ] Chạy `npm run test --run [path-to-test-file]` để verify test pass
-- [ ] Chạy `npm run coverage --run` để check coverage
+- [ ] Chạy test filter theo file + `--reporter=dot` + `tail -30` để verify pass (xem "Workflow tiết kiệm token")
+- [ ] Chạy coverage với `--coverage.include='src/path/to/file.ts'` để đọc cột `Uncovered Line #s`, KHÔNG chạy coverage toàn project
 
 ## Coverage Priority Files
 

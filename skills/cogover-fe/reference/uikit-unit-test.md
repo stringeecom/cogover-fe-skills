@@ -540,7 +540,7 @@ Output mặc định của vitest/coverage rất dài (hàng trăm file, console
 #### Bước 1: Chạy test cho đúng file → biết pass/fail
 
 ```bash
-npm run test --run src/__test__/path/to/file.test.tsx --reporter=dot 2>&1 | tail -30
+npm run test -- --run src/__test__/path/to/file.test.tsx --reporter=dot 2>&1 | tail -30
 ```
 
 - `--reporter=dot`: mỗi test chỉ 1 ký tự `.` hoặc `x` → output rất ngắn
@@ -548,7 +548,7 @@ npm run test --run src/__test__/path/to/file.test.tsx --reporter=dot 2>&1 | tail
 - Nếu có test fail → chạy lại và grep chi tiết lỗi:
 
 ```bash
-npm run test --run src/__test__/path/to/file.test.tsx 2>&1 > /tmp/test.log
+npm run test -- --run src/__test__/path/to/file.test.tsx 2>&1 > /tmp/test.log
 grep -nE "FAIL|✗|Error|Expected|Received|AssertionError" /tmp/test.log | head -50
 ```
 

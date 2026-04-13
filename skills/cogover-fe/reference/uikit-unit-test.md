@@ -526,10 +526,77 @@ renderComponent(<ParentPage />);
 
 ## Yêu cầu Coverage
 
-**Mục tiêu: mỗi file test phải đạt >= 90% coverage lines cho file source tương ứng.**
+**Mục tiêu (BẮT BUỘC cả 2):**
+1. **Lines coverage ≥ 90%** cho mỗi file source
+2. **Branches coverage = 100%** cho mỗi file source — KHÔNG được thiếu bất kỳ nhánh nào
 
 - Ưu tiên cover: happy path → error/edge cases → conditional branches → fallback values
-- Nếu chưa đạt 90%, bổ sung test cases cho các nhánh chưa cover (if/else, early return, error handling, edge cases)
+- Nếu chưa đạt mục tiêu, bổ sung test cases cho các nhánh chưa cover (if/else, early return, error handling, edge cases)
+
+### 100% Branches — cover đủ mọi nhánh
+
+**Mọi điểm rẽ nhánh trong code đều phải có test cover cả 2 phía (hoặc tất cả các nhánh nếu nhiều hơn 2).** Không được bỏ qua nhánh vì "khó tạo điều kiện" hay "trường hợp không thể xảy ra" — nếu code có branch đó thì test phải cover nó, hoặc xoá branch thừa khỏi source.
+
+#### Các loại branch phải cover
+
+| Loại | Ví dụ | Cần test |
+|------|-------|---------|
+| `if / else` | `if (x) { A } else { B }` | 1 case `x` truthy + 1 case falsy |
+| Ternary | `cond ? a : b` | 1 case truthy + 1 case falsy |
+| Short-circuit `&&` | `a && b()` | `a` truthy (chạy `b()`) + `a` falsy (skip) |
+| Short-circuit `\|\|` | `a \|\| b` | `a` truthy + `a` falsy |
+| Nullish `??` | `a ?? b` | `a` null/undefined + `a` có giá trị |
+| Optional chaining `?.` | `obj?.prop` | `obj` null/undefined + `obj` có giá trị |
+| Default param | `function f(x = 10)` | Gọi có `x` + gọi không có `x` |
+| `switch / case` | `switch(type)` | 1 case cho mỗi `case` + `default` |
+| `try / catch` | `try { a() } catch {}` | 1 case `a()` success + 1 case `a()` throw |
+| Early return | `if (!x) return;` | Case trigger return + case không trigger |
+| Conditional render | `{show && <Comp />}` | `show=true` + `show=false` |
+| Conditional prop | `<X y={a ? 1 : 2} />` | Cả 2 giá trị `a` |
+
+#### Cách phát hiện branch chưa cover
+
+Text reporter của `--coverage.include='src/path/to/file.ts'` có cột **`% Branch`**. Nếu < 100% → có branch chưa cover.
+
+Để biết chính xác branch nào thiếu, dùng `json` reporter rồi parse:
+
+```bash
+npm run coverage -- --run src/__test__/path/to/file.test.tsx \
+  --coverage.include='src/path/to/file.ts' \
+  --coverage.reporter=json-summary \
+  --coverage.reporter=json 2>&1 | tail -10
+```
+
+Sau đó parse `coverage/coverage-final.json` lấy branch map của file:
+
+```bash
+jq '."'"$(pwd)"'/src/path/to/file.ts" | {branchMap, b}' coverage/coverage-final.json | head -100
+```
+
+- `branchMap[id]` → vị trí branch trong source (line, type: `if`/`cond-expr`/`switch`/...)
+- `b[id]` → array hit count cho từng nhánh (ví dụ `[3, 0]` = nhánh 1 hit 3 lần, nhánh 2 chưa hit → thiếu)
+
+Branch nào có giá trị `0` trong array `b[id]` → đó là branch chưa cover → dựa vào `branchMap[id].loc` để biết line → bổ sung test case.
+
+#### Khi nào được phép < 100% branches
+
+Chỉ 2 trường hợp:
+1. **Defensive code không thể trigger**: ví dụ `if (!obj) throw new Error('unreachable')` với `obj` luôn có giá trị theo type. → Giải pháp: xoá defensive branch hoặc dùng `/* v8 ignore next */` comment với lý do rõ ràng.
+2. **Branch do TypeScript narrow tự thêm**: hiếm gặp. → Cùng giải pháp `v8 ignore` với comment giải thích.
+
+KHÔNG được dùng `v8 ignore` chỉ vì "lười viết test case". Mỗi lần dùng phải có comment lý do cụ thể, reviewer sẽ kiểm tra.
+
+```typescript
+// ✅ OK: có lý do defensive rõ ràng
+/* v8 ignore next 3 -- defensive: TypeScript đảm bảo obj không null tại đây */
+if (!obj) {
+    throw new Error('unreachable');
+}
+
+// ❌ SAI: không lý do
+/* v8 ignore next */
+if (someCondition) { ... }
+```
 
 ### Workflow tiết kiệm token khi chạy test & coverage
 
@@ -667,6 +734,7 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Mock data viết đầy đủ theo type, KHÔNG dùng `as unknown as Type`
 - [ ] Mock data constants đặt trong `src/__mocks__/` để tái sử dụng
 - [ ] Đạt >= 90% coverage lines cho mỗi file source
+- [ ] Đạt 100% coverage branches cho mỗi file source (nếu < 100%, xác định branch thiếu qua `coverage-final.json` và bổ sung test, hoặc dùng `v8 ignore` kèm lý do rõ ràng)
 - [ ] Khảo sát cấu trúc thư mục trước khi viết (Bước 0) → viết theo thứ tự leaf-first (Tier 0 → Tier 4)
 - [ ] Chạy test filter theo file + `--reporter=dot` + `tail -30` để verify pass (xem "Workflow tiết kiệm token")
 - [ ] Chạy coverage với `--coverage.include='src/path/to/file.ts'` để đọc cột `Uncovered Line #s`, KHÔNG chạy coverage toàn project

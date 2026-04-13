@@ -11,6 +11,65 @@
 
 ## Quy trình viết test
 
+### Bước 0: Khảo sát cấu trúc thư mục (BẮT BUỘC)
+
+**Quy tắc cốt lõi: Khi được yêu cầu viết unit test cho 1 folder/module/feature, KHÔNG được viết ngay vào file user chỉ định. PHẢI khảo sát toàn bộ cấu trúc thư mục trước, rồi viết test theo thứ tự leaf-first (bottom-up).**
+
+#### Vì sao phải làm vậy?
+
+- Component cha render thật component con (theo rule "KHÔNG mock component"). Nếu component con chưa có test và còn bug → test cha fail vì lý do không liên quan tới cha → khó debug.
+- Utils/hooks được nhiều component dùng chung → test utils trước sẽ phát hiện bug sớm, tránh viết lại nhiều lần khi fix.
+- Leaf file (utils, helpers, pure functions) coverage dễ đạt 90% nhất → làm trước để build momentum.
+
+#### Các bước khảo sát
+
+1. **Map toàn bộ cây thư mục** của phần cần test bằng `Glob` hoặc `list_dir`:
+   ```
+   Glob: src/components/Foo/**/*.{ts,tsx}
+   ```
+   Liệt kê mọi file source (loại trừ file test, `index.ts` re-export thuần).
+
+2. **Phân loại từng file** theo độ sâu dependency:
+   - **Tier 0 — Leaf (không dependency nội bộ)**: `utils/*.ts`, `constants.ts`, `types.ts`, pure helpers. Không import từ file khác trong cùng folder.
+   - **Tier 1 — Hooks**: `hooks/*.ts`. Có thể import từ Tier 0, mock API nếu cần.
+   - **Tier 2 — Leaf components**: component nhỏ không chứa component con nội bộ (chỉ dùng `@stringeecom/ui-kit`). Có thể import Tier 0 + Tier 1.
+   - **Tier 3 — Container components**: component chứa Tier 2 bên trong.
+   - **Tier 4 — Page/Root**: file top-level ráp toàn bộ.
+
+3. **Kiểm tra test đã tồn tại** bằng `Glob` trong `src/__test__/` mirror path → bỏ qua file đã có test, tránh duplicate.
+
+4. **Lập danh sách thứ tự viết test** (bằng `TaskCreate` nếu >= 3 file): Tier 0 → Tier 1 → Tier 2 → Tier 3 → Tier 4. Trong cùng tier, viết file nào cũng được.
+
+5. **Viết test tuần tự theo thứ tự trên**, mỗi file:
+   - Viết test → chạy test (Bước 1 "Workflow tiết kiệm token") → verify pass
+   - Check coverage (Bước 2) → bổ sung case tới khi ≥ 90%
+   - Mới chuyển sang file tier tiếp theo
+
+#### Ví dụ
+
+User yêu cầu: *"Viết unit test cho `src/components/Chat/ChatBox/`"*
+
+Cây thư mục:
+```
+src/components/Chat/ChatBox/
+├── index.tsx                       ← Tier 3 (import ChatInput, MessageList, useChatSocket)
+├── ChatInput.tsx                   ← Tier 2 (leaf component)
+├── MessageList.tsx                 ← Tier 2 (leaf component)
+├── hooks/
+│   ├── useChatSocket.ts            ← Tier 1 (hook, gọi API)
+│   └── useMessageScroll.ts         ← Tier 1 (hook thuần)
+└── utils/
+    └── messageFormatter.ts         ← Tier 0 (pure function)
+```
+
+Thứ tự viết test ĐÚNG:
+1. `utils/messageFormatter.ts` (Tier 0)
+2. `hooks/useMessageScroll.ts`, `hooks/useChatSocket.ts` (Tier 1)
+3. `ChatInput.tsx`, `MessageList.tsx` (Tier 2)
+4. `index.tsx` (Tier 3)
+
+❌ SAI: viết ngay test cho `index.tsx` khi các file con chưa có test.
+
 ### Bước 1: Đọc source file cần test
 
 Đọc toàn bộ file source để hiểu:
@@ -608,6 +667,7 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Mock data viết đầy đủ theo type, KHÔNG dùng `as unknown as Type`
 - [ ] Mock data constants đặt trong `src/__mocks__/` để tái sử dụng
 - [ ] Đạt >= 90% coverage lines cho mỗi file source
+- [ ] Khảo sát cấu trúc thư mục trước khi viết (Bước 0) → viết theo thứ tự leaf-first (Tier 0 → Tier 4)
 - [ ] Chạy test filter theo file + `--reporter=dot` + `tail -30` để verify pass (xem "Workflow tiết kiệm token")
 - [ ] Chạy coverage với `--coverage.include='src/path/to/file.ts'` để đọc cột `Uncovered Line #s`, KHÔNG chạy coverage toàn project
 

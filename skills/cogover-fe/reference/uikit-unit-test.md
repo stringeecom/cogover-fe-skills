@@ -1,5 +1,16 @@
 # Unit Test - @stringeecom/ui-kit
 
+## Nguyên tắc tuyệt đối (đọc trước tiên)
+
+Các rule này KHÔNG có ngoại lệ. Vi phạm = sửa lại, không giải thích:
+
+1. **KHÔNG cast type trong mock** — mọi mock data / mock props / mock response / mock handler / mock context phải khai báo đầy đủ theo đúng type. Cấm `as unknown as T`, `as any`, `as T`, `{} as T`, `<T>{}`. Type lớn → dùng **factory function** có default đủ type + `Partial<T>` override. Xem section "Mock Data" bên dưới.
+2. **KHÔNG mock component con, hook nội bộ, util nội bộ, `@stringeecom/ui-kit`, `@fortawesome/*`** — render thật toàn bộ tree.
+3. **KHÔNG `vi.mock('src/apis/...')`** — mock API qua MSW handler mặc định trong `src/__mocks__/handlers/`.
+4. **KHÔNG `fireEvent`** — luôn dùng `userEvent`.
+5. **KHÔNG `npx vitest`** — luôn qua `npm run test` / `npm run coverage`.
+6. **Coverage**: lines ≥ 90%, branches = 100% cho mỗi file source.
+
 ## Tech Stack
 
 - **Test framework**: Vitest (global APIs: `describe`, `it`, `expect`, `vi`)
@@ -750,11 +761,31 @@ jq '."src/path/to/file.ts"' coverage/coverage-summary.json
 - ❌ Đọc file `coverage/coverage-final.json` full → quá lớn, dùng `coverage-summary.json`
 - ❌ Đọc full `/tmp/test.log` bằng `Read` không offset → dùng `Grep` hoặc `tail` để lấy phần cần
 
-## Mock Data (BẮT BUỘC)
+## Mock Data (BẮT BUỘC — KHÔNG NEGOTIATE)
 
-**Quy tắc cốt lõi: Viết đầy đủ dữ liệu mock theo đúng type, KHÔNG dùng `as unknown as Type` để bỏ qua lỗi TypeScript.**
+**Quy tắc cốt lõi (tuyệt đối, không có ngoại lệ): Mọi giá trị mock trong test — bất kể là mock data, mock props, mock response, mock hàm, mock context, mock event... — PHẢI được khai báo đầy đủ theo đúng type của nó. TUYỆT ĐỐI KHÔNG dùng `as unknown as Type`, `as any`, `as Type` để bypass lỗi TypeScript.**
 
-### Cách viết mock data đúng:
+Lý do không đàm phán:
+- Mock kiểu `as unknown as Type` che dấu field thiếu → test pass giả, khi type thay đổi runtime mới phát hiện bug.
+- User phải review đi review lại để bắt các chỗ lười type. Không chấp nhận — phải đúng ngay lần đầu.
+- Nếu type quá phức tạp để viết tay → đó là tín hiệu dùng **factory function** (xem bên dưới) hoặc tách mock data vào `src/__mocks__/`, KHÔNG phải tín hiệu để cast bỏ qua.
+
+### Các hình thức cast bị CẤM
+
+```typescript
+// ❌ CẤM tuyệt đối — tất cả các kiểu cast dưới đây đều KHÔNG được dùng trong test
+const mockUser = { accountId: '1' } as unknown as GetListDataFieldAccountInfo;
+const mockUser = { accountId: '1' } as any as GetListDataFieldAccountInfo;
+const mockUser = { accountId: '1' } as GetListDataFieldAccountInfo;
+const mockUser = {} as GetListDataFieldAccountInfo;
+const mockResponse = fakeData as unknown as ApiResponse<Record>;
+const mockProps: ComponentProps = { name: 'x' } as ComponentProps;  // thiếu field bắt buộc
+renderComponent(<Comp {...({ partial: true } as Props)} />);
+```
+
+Chỉ có 1 cách đúng: khai báo biến với type annotation rồi điền đủ field.
+
+### Cách viết mock data đúng
 
 ```typescript
 // ❌ SAI: Bỏ qua lỗi TS bằng as unknown
@@ -772,6 +803,27 @@ const MOCK_USER_ADMIN: GetListDataFieldAccountInfo = {
     email: 'admin@example.com',
     phone: '',
 };
+```
+
+### Khi type quá lớn → dùng factory function (KHÔNG cast)
+
+Nếu phải viết 30+ field cho 1 object không liên quan tới test case, giải pháp là factory function có default đầy đủ type, nhận `overrides?: Partial<T>`:
+
+```typescript
+// ✅ Factory trả về giá trị đầy đủ type, test chỉ override field cần quan tâm
+export const createMockRecord = (overrides?: Partial<Record>): Record => ({
+    id: 'record-1',
+    objectSlug: 'contact',
+    createdBy: MOCK_USER_ADMIN,
+    created: 0,
+    updatedBy: MOCK_USER_ADMIN,
+    updated: 0,
+    values: {},
+    ...overrides,
+});
+
+// Dùng trong test — không cast
+const record = createMockRecord({ id: 'special-id' });
 ```
 
 ### Tổ chức mock data:
@@ -814,7 +866,7 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Dùng `userEvent` cho user interaction, KHÔNG dùng `fireEvent`
 - [ ] Mock API bằng MSW handler mặc định trong `src/__mocks__/handlers/`, KHÔNG dùng `vi.mock('src/apis/...')`
 - [ ] Khi cần nhiều response khác nhau → truyền params khác nhau từ test + if/else trong handler mặc định, HẠN CHẾ `server.use()` + `{ once: true }` trong test body
-- [ ] Mock data viết đầy đủ theo type, KHÔNG dùng `as unknown as Type`
+- [ ] **Mọi giá trị mock** (data, props, response, handler, context, event...) viết đầy đủ theo type — KHÔNG `as unknown as T`, `as any`, `as T`, `{} as T`. Type quá lớn → dùng factory function có `Partial<T>` override
 - [ ] Mock data constants đặt trong `src/__mocks__/` để tái sử dụng
 - [ ] Đạt >= 90% coverage lines cho mỗi file source
 - [ ] Đạt 100% coverage branches cho mỗi file source (nếu < 100%, xác định branch thiếu qua `coverage-final.json` và bổ sung test, hoặc dùng `v8 ignore` kèm lý do rõ ràng)

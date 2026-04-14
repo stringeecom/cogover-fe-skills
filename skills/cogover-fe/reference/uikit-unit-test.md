@@ -70,13 +70,19 @@ Thứ tự viết test ĐÚNG:
 
 ❌ SAI: viết ngay test cho `index.tsx` khi các file con chưa có test.
 
-### Bước 1: Đọc source file cần test
+### Bước 1: Đọc code, tìm hiểu nghiệp vụ
 
 Đọc toàn bộ file source để hiểu:
+- Nghiệp vụ của component/hook/hàm đang làm gì — input, output, side effects
 - Các functions/hooks/components được export
-- Dependencies và imports
+- Dependencies và imports (đặc biệt là các API call)
 - Logic branching, edge cases
 - Types và interfaces
+
+Sau khi hiểu code, quyết định flow tiếp theo:
+
+- **Không cần mock API** (pure function, hook thuần, component không gọi API) → nhảy thẳng sang **Bước 2** viết test luôn.
+- **Cần mock API** → sang **Bước 3** phân tích các API cần mock, viết/mở rộng handler trong `src/__mocks__/handlers/` trước, **rồi mới** quay lại **Bước 2** viết test.
 
 ### Bước 2: Xác định loại test
 
@@ -269,6 +275,18 @@ await user.type(input, "text");
 
 **QUAN TRỌNG: KHÔNG dùng `vi.mock()` để mock module API (`src/apis/*`). Dùng MSW intercept ở tầng network** để test chạy thật từ component → hook → API call → MSW trả response.
 
+**Thứ tự làm việc bắt buộc khi có mock API**:
+1. **Phân tích API cần mock** — list ra tất cả endpoint/service mà component/hook sẽ gọi, từng API cần những response nào (happy path, empty, error, filter theo param…).
+2. **Viết hoặc mở rộng handler** trong `src/__mocks__/handlers/` cho đủ các response cần thiết (thêm nhánh if/else theo params nếu cần). Chưa viết test.
+3. **Mới viết test** dùng handler vừa viết. Không vừa viết test vừa nghĩ mock.
+
+**Nguyên tắc cốt lõi: Ưu tiên viết handler mặc định trong `src/__mocks__/handlers/`. Khi cần nhiều response khác nhau cho cùng 1 API, truyền params khác nhau từ test và xử lý if/else trong handler để trả về response tương ứng. HẠN CHẾ dùng `server.use()` kèm `{ once: true }` trong file test.**
+
+Vì sao?
+- Handler mặc định tập trung 1 chỗ → dễ maintain, dễ tái sử dụng giữa nhiều test files.
+- Override trong test body làm test case rối, trùng lặp logic mock, khó reason về thứ tự handler.
+- Logic if/else theo params trong handler mô phỏng đúng hành vi backend thật (cùng endpoint, response khác nhau theo input).
+
 #### Kiến trúc API mock trong project
 
 Project dùng **service-based routing** — tất cả requests gửi tới 1 endpoint duy nhất (ví dụ `multiChannelUri.index`), phân biệt service bằng header `X_SERVICE_KEY`.
@@ -293,33 +311,84 @@ src/__mocks__/
 
 #### Cách viết handler mới
 
+Handler mặc định đặt trong `src/__mocks__/handlers/`. Khi test cần nhiều response khác nhau cho cùng 1 API → **không** override trong test body, mà **truyền params khác nhau từ test** (ví dụ `id`, `slug`, `keyword`, `status` trong `body`) rồi xử lý if/else ngay trong handler để map params → response.
+
 ```typescript
 import { http, HttpHandler, HttpResponse } from "msw";
-import { _mockApiSuccess } from "../_mock";
+import { _mockApiSuccess, _mockApiError } from "../_mock";
 
-// 1. Chuẩn bị mock data
-const MOCK_DATA = [{ id: "1", name: "Test Item" }];
+// 1. Chuẩn bị các biến thể mock data
+const MOCK_ITEMS = [
+    { id: "1", name: "Item 1", status: "active" },
+    { id: "2", name: "Item 2", status: "inactive" },
+];
 
-// 2. Định nghĩa routes map: service number → handler function
+// 2. Handler branch theo params trong body
+const listHandler = (body: { keyword?: string; status?: string }) => {
+    // Case: search không ra kết quả
+    if (body.keyword === "__empty__") {
+        return HttpResponse.json(_mockApiSuccess({ total: 0, records: [] }));
+    }
+    // Case: filter theo status
+    if (body.status) {
+        const records = MOCK_ITEMS.filter((item) => item.status === body.status);
+        return HttpResponse.json(_mockApiSuccess({ total: records.length, records }));
+    }
+    // Case mặc định: trả full list
+    return HttpResponse.json(_mockApiSuccess({ total: MOCK_ITEMS.length, records: MOCK_ITEMS }));
+};
+
+const detailHandler = (body: { id: string }) => {
+    // Case: id không tồn tại → error
+    if (body.id === "__not_found__") {
+        return HttpResponse.json(_mockApiError("Item not found", 1));
+    }
+    const item = MOCK_ITEMS.find((i) => i.id === body.id) ?? MOCK_ITEMS[0];
+    return HttpResponse.json(_mockApiSuccess(item));
+};
+
+// 3. Routes map: service number → handler function
 const routes = {
-    [myServices.list]: () =>
-        HttpResponse.json(_mockApiSuccess({ total: 1, search_after: [], records: MOCK_DATA })),
-    [myServices.create]: () =>
-        HttpResponse.json(_mockApiSuccess(null)),
+    [myServices.list]: (body) => listHandler(body as never),
+    [myServices.detail]: (body) => detailHandler(body as never),
+    [myServices.create]: () => HttpResponse.json(_mockApiSuccess(null)),
 } as Record<number, (body: unknown, service: number) => StrictResponse<JsonBodyType>>;
 
-// 3. Router function: đọc header → dispatch đến handler
+// 4. Router function: đọc header → dispatch đến handler
 async function serviceRouter({ request }: ResolverParams) {
     const payload = (await request.json()) as { body: unknown };
     const service = Number(request.headers.get(X_SERVICE_KEY));
     if (!service) return HttpResponse.json({ message: "service not found" }, { status: 404 });
     const fn = routes[service];
     if (!fn) return HttpResponse.json({ message: "route not found" }, { status: 404 });
-    return fn(payload, service);
+    return fn(payload.body, service);
 }
 
-// 4. Export MSW handler
+// 5. Export MSW handler
 export const myHandler: HttpHandler[] = [http.post(myUri.index, serviceRouter)];
+```
+
+Test sử dụng handler này bằng cách truyền params khác nhau vào component/hook:
+
+```typescript
+// Case mặc định — không cần override
+it("should render full list", async () => {
+    renderComponent(<ItemList />);
+    await waitFor(() => expect(screen.getByText("Item 1")).toBeVisible());
+});
+
+// Case empty — truyền keyword sentinel đã được handler handle
+it("should show empty state when search returns no result", async () => {
+    const { user } = renderComponent(<ItemList />);
+    await user.type(screen.getByRole("textbox"), "__empty__");
+    await waitFor(() => expect(screen.getByText("No data")).toBeVisible());
+});
+
+// Case error — truyền id sentinel mà handler map sang error response
+it("should show error toast when item not found", async () => {
+    renderComponent(<ItemDetail id="__not_found__" />);
+    await waitFor(() => expect(screen.getByText("Item not found")).toBeVisible());
+});
 ```
 
 #### Response helpers có sẵn (`src/__mocks__/_mock.ts`)
@@ -336,23 +405,33 @@ _mockApiError(msg, r?)
 _mockSuccessServiceApi({ service, type, data })
 ```
 
-#### Override handler cho test cụ thể
+#### Override handler trong test body (chỉ khi thật sự cần)
+
+**Hạn chế tối đa. Ưu tiên mở rộng handler mặc định theo params như trên.** Chỉ override trong test body khi:
+
+- Case rất cá biệt chỉ xuất hiện trong 1 test, không muốn làm bẩn handler mặc định.
+- Cần mô phỏng lỗi network / timeout / status code đặc biệt mà handler mặc định không model.
+- Không có cách nào truyền params từ component để handler mặc định phân biệt case.
+
+Nếu rơi vào 1 trong các trường hợp trên, dùng `server.use()` kèm `{ once: true }`:
 
 ```typescript
 import { http, HttpResponse } from "msw";
 import { server } from "../../setup"; // adjust path
 
-it("should handle API error", async () => {
+it("should handle 500 network error", async () => {
     server.use(
         http.post("/api/endpoint", () => {
-            return HttpResponse.json({ r: 1, msg: "Error" });
-        }, { once: true })  // ← chỉ chạy 1 lần, sau đó revert về handler mặc định
+            return new HttpResponse(null, { status: 500 });
+        }, { once: true })  // chỉ chạy 1 lần, sau đó revert về handler mặc định
     );
 
     renderComponent(<MyComponent />);
     // ... assertions
 });
 ```
+
+Trước khi override, luôn cân nhắc: *có thể thêm 1 nhánh if/else trong handler mặc định và truyền sentinel params từ component không?* Nếu có → làm cách đó.
 
 #### Sử dụng mock utilities có sẵn (`src/__mocks__/utils.ts`)
 
@@ -379,10 +458,10 @@ it("should load records", async () => {
 #### Quy tắc mock API
 
 - **KHÔNG `vi.mock('src/apis/...')`** — dùng MSW handler thay thế
-- **`{ once: true }`** khi override handler trong test body
+- **Ưu tiên handler mặc định** trong `src/__mocks__/handlers/` — tự động load qua `setup.ts`
+- **Khi cần nhiều response khác nhau cho cùng 1 API → truyền params khác nhau từ test và viết if/else trong handler**, KHÔNG override trong test body
+- **HẠN CHẾ `server.use()` + `{ once: true }`** trong file test — chỉ dùng cho case cá biệt (network error, status code lạ) không thể model bằng params
 - **`server.use()`** chỉ dùng trong test body, KHÔNG dùng trong `beforeAll`
-- Handler mặc định đặt trong `src/__mocks__/handlers/` — tự động load qua `setup.ts`
-- Override chỉ khi cần test case đặc biệt (error, empty data, v.v.)
 
 ## File Structure Convention
 
@@ -730,7 +809,8 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] KHÔNG mock `@fortawesome/*` — FontAwesome icons và components phải render thật
 - [ ] Kiểm tra component con đã có test chưa trước khi viết → tránh duplicate
 - [ ] Dùng `userEvent` cho user interaction, KHÔNG dùng `fireEvent`
-- [ ] Mock API bằng MSW handler, KHÔNG dùng `vi.mock('src/apis/...')`
+- [ ] Mock API bằng MSW handler mặc định trong `src/__mocks__/handlers/`, KHÔNG dùng `vi.mock('src/apis/...')`
+- [ ] Khi cần nhiều response khác nhau → truyền params khác nhau từ test + if/else trong handler mặc định, HẠN CHẾ `server.use()` + `{ once: true }` trong test body
 - [ ] Mock data viết đầy đủ theo type, KHÔNG dùng `as unknown as Type`
 - [ ] Mock data constants đặt trong `src/__mocks__/` để tái sử dụng
 - [ ] Đạt >= 90% coverage lines cho mỗi file source
@@ -744,7 +824,7 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 1. **Tách test data ra file riêng** khi có nhiều IO cases → tạo `ioData.ts`
 2. **Dùng `vi.fn()`** cho callback props, **`vi.spyOn()`** để spy existing methods
 3. **`waitFor`** cho async operations (API calls, state updates)
-4. **`{ once: true }`** khi override MSW handlers để không ảnh hưởng test khác
+4. **Mở rộng handler mặc định** theo params thay vì override trong test body. Chỉ dùng `server.use()` + `{ once: true }` cho case cá biệt không thể model bằng params
 5. **`server.use()`** chỉ dùng trong test body, KHÔNG dùng trong `beforeAll`
 6. **`userEvent.setup()`** trả về từ `renderComponent` → dùng `{ user }` destructuring. Khi dùng `render` thủ công → `const user = userEvent.setup()` trước khi render
 7. **KHÔNG mock component hay hàm nội bộ** — chỉ mock API bằng MSW và `cogover-comm-web-sdk`. Render thật toàn bộ component tree

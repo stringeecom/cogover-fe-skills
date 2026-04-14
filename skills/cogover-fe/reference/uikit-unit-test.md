@@ -681,6 +681,8 @@ if (someCondition) { ... }
 
 **Quy tắc cốt lõi: KHÔNG bao giờ chạy nguyên suite test/coverage rồi đọc full output. Luôn filter theo đúng 1 file test + 1 file source cần quan tâm, và dùng reporter gọn nhất.**
 
+**KHÔNG dùng `npx` để chạy bất kỳ command test/coverage nào** (không `npx vitest`, không `npx vitest run`, không `npx vitest --coverage`...). Luôn chạy qua script trong `package.json` bằng `npm run test` / `npm run coverage`. Lý do: script đã cấu hình sẵn env, reporter, path alias; `npx` bypass toàn bộ, dễ sai config và làm kết quả không nhất quán giữa các lần chạy.
+
 Output mặc định của vitest/coverage rất dài (hàng trăm file, console.log, stack trace...) → ngốn context cực nhanh. Dùng 3 bước sau:
 
 #### Bước 1: Chạy test cho đúng file → biết pass/fail
@@ -744,6 +746,7 @@ jq '."src/path/to/file.ts"' coverage/coverage-summary.json
 
 - ❌ `npm run test` (chạy nguyên suite) → output hàng nghìn dòng
 - ❌ `npm run coverage` không có `--coverage.include` → in bảng của **toàn bộ** file trong project
+- ❌ `npx vitest` / `npx vitest run` / `npx vitest --coverage` → bypass script package.json, sai config
 - ❌ Đọc file `coverage/coverage-final.json` full → quá lớn, dùng `coverage-summary.json`
 - ❌ Đọc full `/tmp/test.log` bằng `Read` không offset → dùng `Grep` hoặc `tail` để lấy phần cần
 
@@ -818,6 +821,7 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Khảo sát cấu trúc thư mục trước khi viết (Bước 0) → viết theo thứ tự leaf-first (Tier 0 → Tier 4)
 - [ ] Chạy test filter theo file + `--reporter=dot` + `tail -30` để verify pass (xem "Workflow tiết kiệm token")
 - [ ] Chạy coverage với `--coverage.include='src/path/to/file.ts'` để đọc cột `Uncovered Line #s`, KHÔNG chạy coverage toàn project
+- [ ] Dùng `npm run test` / `npm run coverage`, KHÔNG dùng `npx vitest` hay bất kỳ command test nào qua `npx`
 
 ## Tips
 

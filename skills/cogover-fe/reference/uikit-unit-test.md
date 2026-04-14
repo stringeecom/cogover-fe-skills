@@ -739,41 +739,6 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Chạy test filter theo file + `--reporter=dot` + `tail -30` để verify pass (xem "Workflow tiết kiệm token")
 - [ ] Chạy coverage với `--coverage.include='src/path/to/file.ts'` để đọc cột `Uncovered Line #s`, KHÔNG chạy coverage toàn project
 
-## Coverage Priority Files
-
-Các file cần bổ sung test để tăng coverage (theo thứ tự ưu tiên):
-
-### Tier 1: Utils (pure functions, dễ nhất)
-| File | Current | Uncovered Lines |
-|------|---------|----------------|
-| `src/utils/app.ts` | 31.4% | ~431 |
-| `src/utils/workflow.ts` | 16.0% | ~132 |
-| `src/utils/string.ts` | 15.2% | ~104 |
-| `src/utils/object.ts` | 17.0% | ~85 |
-| `src/utils/cx.ts` | 8.6% | ~76 |
-| `src/utils/badge.ts` | 12.9% | ~56 |
-| `src/utils/file.ts` | 16.4% | ~55 |
-| `src/utils/time.ts` | 54.5% | ~33 |
-
-### Tier 2: Hooks (renderHook)
-| File | Current | Uncovered Lines |
-|------|---------|----------------|
-| `FormBuilder/hooks/useCreateSchema` | 27.9% | ~522 |
-| `FormBuilder/hooks/useSubmitFormBuilder` | 13.0% | ~435 |
-| `hooks/useSlider` | 1.2% | ~207 |
-| `hooks/useFormatCurrency` | 2.1% | ~174 |
-| `hooks/useSetRecordValue` | 0.9% | ~148 |
-| `hooks/useFilterBuilder` | 0% | ~143 |
-
-### Tier 3: Components (render + userEvent)
-| Component | Current | Uncovered Lines |
-|-----------|---------|----------------|
-| `FormBuilderButtonGroup` | 38.4% | ~713 |
-| `DataFields/LongText` | 31.5% | ~710 |
-| `RelatedListCards` | 44.7% | ~629 |
-| `Table (core)` | 50.5% | ~536 |
-| `UploadFile` | 58.7% | ~415 |
-
 ## Tips
 
 1. **Tách test data ra file riêng** khi có nhiều IO cases → tạo `ioData.ts`

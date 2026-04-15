@@ -20,6 +20,11 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 3. Áp dụng quy tắc khi implement. Tuân theo DO/DON'T chính xác
 4. Commit/i18n → đọc `{skill_base_dir}/reference/commit-convention.md` hoặc `i18n-translation.md`
 
+### TUYỆT ĐỐI KHÔNG (CRITICAL — HIGHEST PRIORITY):
+- **KHÔNG BAO GIỜ, TRONG BẤT KỲ TRƯỜNG HỢP NÀO**, sử dụng component/hook/API đã bị **deprecated** (`@deprecated` JSDoc, tên có hậu tố `Legacy`/`Old`/`V1`, hoặc được ghi chú deprecated trong `@stringeecom/ui-kit` / reference files). Đây là rule **BẤT KHẢ XÂM PHẠM** — vi phạm = reject PR ngay lập tức, không có ngoại lệ.
+- Trước khi dùng bất kỳ component nào từ `@stringeecom/ui-kit`: **kiểm tra JSDoc `@deprecated`** và reference file tương ứng. Nếu deprecated → dùng bản thay thế được ghi trong JSDoc/reference.
+- Khi thấy code cũ đang dùng component deprecated → KHÔNG copy pattern đó, phải dùng bản mới.
+
 ### Quy tắc:
 - **CHỈ đọc reference liên quan** task hiện tại, KHÔNG đọc hết
 - Task phức tạp → đọc song song nhiều Read calls

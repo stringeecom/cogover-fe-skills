@@ -1,5 +1,28 @@
 ## Form với react-hook-form và Controlled Components
 
+### ⚠️ NGUYÊN TẮC BẮT BUỘC: LUÔN dùng Controlled Components
+
+Khi tạo bất kỳ input nào trong `react-hook-form`, **BẮT BUỘC** sử dụng Controlled Components (các component có prefix `Controlled*` từ `@stringeecom/ui-kit` hoặc tự tạo theo RULE-FORM-04). **TUYỆT ĐỐI KHÔNG** dùng uncontrolled components với `register()` hoặc `ref`.
+
+```tsx
+// ❌ NGHIÊM CẤM — Uncontrolled component với register
+<input {...methods.register("name")} />
+<TextField {...methods.register("email")} />
+
+// ❌ NGHIÊM CẤM — Dùng Controller trực tiếp khi đã có Controlled component sẵn
+<Controller name="name" render={({ field }) => <TextField {...field} />} />
+
+// ✅ BẮT BUỘC — Dùng Controlled component
+<ControlledTextField name="name" label="Tên" />
+<ControlledSelect name="status" options={statusOptions} />
+```
+
+**Lý do:**
+- Đảm bảo tính nhất quán trong toàn bộ codebase
+- Controlled components đã xử lý sẵn error display, `onBlur`, `onChange`, typing
+- Giảm boilerplate code, tránh lỗi lặp lại
+- Nếu chưa có Controlled component phù hợp → tạo mới theo RULE-FORM-04, **KHÔNG** dùng `register()` hay `Controller` trực tiếp
+
 ---
 
 ### RULE-FORM-01: Luôn dùng `useForm` + `FormProvider`

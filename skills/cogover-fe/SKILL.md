@@ -24,6 +24,7 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 - **KHÔNG BAO GIỜ, TRONG BẤT KỲ TRƯỜNG HỢP NÀO**, sử dụng component/hook/API đã bị **deprecated** (`@deprecated` JSDoc, tên có hậu tố `Legacy`/`Old`/`V1`, hoặc được ghi chú deprecated trong `@stringeecom/ui-kit` / reference files). Đây là rule **BẤT KHẢ XÂM PHẠM** — vi phạm = reject PR ngay lập tức, không có ngoại lệ.
 - Trước khi dùng bất kỳ component nào từ `@stringeecom/ui-kit`: **kiểm tra JSDoc `@deprecated`** và reference file tương ứng. Nếu deprecated → dùng bản thay thế được ghi trong JSDoc/reference.
 - Khi thấy code cũ đang dùng component deprecated → KHÔNG copy pattern đó, phải dùng bản mới.
+- **KHÔNG BAO GIỜ** dùng `register()` hoặc uncontrolled input trong `react-hook-form`. **LUÔN LUÔN** dùng Controlled Components (`Controlled*` từ `@stringeecom/ui-kit`). Nếu chưa có → tạo mới theo RULE-FORM-04. Chi tiết: `uikit-form-react-hook-form`
 
 ### Quy tắc:
 - **CHỈ đọc reference liên quan** task hiện tại, KHÔNG đọc hết

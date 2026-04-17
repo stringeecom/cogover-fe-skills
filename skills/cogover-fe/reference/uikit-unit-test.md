@@ -10,6 +10,7 @@ Các rule này KHÔNG có ngoại lệ. Vi phạm = sửa lại, không giải t
 4. **KHÔNG `fireEvent`** — luôn dùng `userEvent`.
 5. **KHÔNG `npx vitest`** — luôn qua `npm run test` / `npm run coverage`.
 6. **Coverage**: lines ≥ 90%, branches = 100% cho mỗi file source.
+7. **BẮT BUỘC FEEDBACK khi phát hiện logic bất hợp lý** — trong quá trình viết test, nếu thấy bất kỳ logic nào trong code nguồn **có vẻ sai, mâu thuẫn, hoặc không hợp lý** (điều kiện ngược, dependency thiếu/thừa, edge case không handle, return value lạ, side-effect không rõ ràng, naming không khớp behavior...) → **DỪNG NGAY, KHÔNG viết test theo logic đó**, báo lại cho user kiểm tra xem code có bị bug không. Tuyệt đối tránh việc "viết test pass theo logic sai" — điều đó sẽ lock bug vào codebase và khiến test mất ý nghĩa. Xem section "Feedback khi phát hiện logic bất hợp lý" bên dưới.
 
 ## Tech Stack
 
@@ -19,6 +20,76 @@ Các rule này KHÔNG có ngoại lệ. Vi phạm = sửa lại, không giải t
 - **Hook testing**: `renderHook` from `@testing-library/react`
 - **API mocking**: MSW v2 (Mock Service Worker) via `msw/node`
 - **Environment**: jsdom, setup file tại `src/__test__/setup.ts`
+
+## Feedback khi phát hiện logic bất hợp lý (CRITICAL)
+
+**Nguyên tắc:** Unit test là để **verify behavior đúng**, KHÔNG phải để "ép test pass với code đang có". Nếu code nguồn có logic sai, việc viết test pass theo logic sai = khóa bug vào codebase + làm test trở thành regression guard cho bug.
+
+### Các dấu hiệu cần feedback ngay
+
+Trong quá trình đọc code để viết test, nếu gặp bất kỳ dấu hiệu nào dưới đây → **DỪNG viết test, báo ngay cho user**:
+
+1. **Điều kiện ngược / sai dấu**: `if (!isValid)` nhưng comment/naming gợi ý logic ngược lại; `>` thay vì `>=` ở boundary; early return nhầm branch.
+2. **Dependency của hook không đúng**: `useEffect`/`useMemo`/`useCallback` thiếu dependency (sẽ stale) hoặc thừa dependency (chạy lại không cần thiết) — xem thêm RULE-TQ-02 về `select` trong TanStack Query.
+3. **Edge case không handle**: không check `null`/`undefined`/empty array/array rỗng trước khi truy cập, không handle lỗi API trả về, divide by zero...
+4. **Return value lạ / không nhất quán**: hàm khi thì return `null`, khi thì return `undefined`, khi thì throw — không theo contract rõ ràng.
+5. **Side-effect không rõ ràng**: function pure lẽ ra không mutate nhưng lại mutate argument; hook gọi setState trong render.
+6. **Naming không khớp behavior**: tên hàm `isActive` nhưng return ngược lại; biến `userId` nhưng chứa `userName`.
+7. **Race condition tiềm ẩn**: không cleanup subscription/timer trong `useEffect`, không cancel request cũ khi input thay đổi.
+8. **Logic duplicate mâu thuẫn**: 2 nơi cùng compute 1 giá trị nhưng công thức khác nhau.
+9. **Type assertion che bug**: `as Type`, `as any`, `!` non-null assertion ở chỗ runtime có thể thực sự là null.
+10. **Comment/JSDoc không khớp implementation**: docstring nói "returns true if X" nhưng code return false trong case X.
+
+### Quy trình khi phát hiện
+
+1. **DỪNG** viết test cho file/function đó ngay.
+2. **Ghi lại** chính xác: file path, line number, đoạn code nghi ngờ, lý do nghi ngờ, behavior kỳ vọng vs behavior hiện tại.
+3. **Báo cho user** theo format:
+
+   ```
+   ⚠️ Nghi ngờ logic bất hợp lý — cần kiểm tra trước khi viết test
+
+   File: src/xxx/yyy.ts:42
+   Code:
+     if (user.age > 18) { return 'adult' }
+
+   Nghi ngờ: Boundary có vẻ sai — theo convention "adult từ 18 tuổi"
+   thì phải là `>= 18`. Hiện tại user đúng 18 tuổi sẽ không được tính là adult.
+
+   → Đây là bug hay intended? Nếu bug, tôi fix code trước rồi mới viết test.
+   ```
+
+4. **CHỜ** user confirm:
+   - User bảo "đó là bug, fix đi" → fix code trước, rồi mới viết test theo behavior đúng.
+   - User bảo "đó là intended" → viết test theo logic hiện tại, kèm comment giải thích tại sao boundary đó là intended (để tránh người sau nghi ngờ lại).
+   - User bảo "để sau, cứ skip" → thêm `it.skip` kèm comment `// TODO: confirm behavior` và chuyển sang file khác.
+
+### Sai — tuyệt đối không làm
+
+```typescript
+// ❌ Thấy boundary nghi vấn nhưng tự viết test theo logic hiện tại
+// mà không hỏi → lock bug vào test
+it("should return 'adult' when age > 18", () => {
+  expect(getAgeGroup({ age: 19 })).toBe("adult");
+  expect(getAgeGroup({ age: 18 })).toBe("minor"); // ← test này khoá bug!
+});
+```
+
+### Đúng
+
+```typescript
+// ✅ Feedback cho user trước, confirm xong mới viết test
+// (Sau khi user confirm "đó là bug, cần fix"):
+// → Fix code: if (user.age >= 18)
+// → Viết test theo behavior đúng:
+it("should return 'adult' when age is 18 or above", () => {
+  expect(getAgeGroup({ age: 18 })).toBe("adult");
+  expect(getAgeGroup({ age: 19 })).toBe("adult");
+});
+it("should return 'minor' when age is below 18", () => {
+  expect(getAgeGroup({ age: 17 })).toBe("minor");
+});
+```
 
 ## Quy trình viết test
 

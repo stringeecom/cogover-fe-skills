@@ -37,3 +37,68 @@ const useGetUsers = () => {
 // Ví dụ: nếu các hook hiện tại sử dụng axios instance, query key factory, và type riêng
 // thì hook mới cũng phải làm tương tự
 ```
+
+### RULE-TQ-02: Hàm `select` trong `useQuery` BẮT BUỘC phải được bọc bằng `useCallback`
+
+Khi tạo hook lấy dữ liệu với TanStack Query, nếu có sử dụng option `select` trong `useQuery` (hoặc `useInfiniteQuery`), hàm `select` đó **BẮT BUỘC** phải được bọc bằng `useCallback` với đầy đủ dependencies.
+
+**Lý do:**
+
+- Nếu `select` là một inline function hoặc function mới được tạo lại mỗi lần render, TanStack Query sẽ chạy lại `select` mỗi lần render → gây re-compute không cần thiết và có thể dẫn đến re-render thừa ở component consumer.
+- `useCallback` giữ reference ổn định giữa các lần render, giúp TanStack Query memoize kết quả của `select` đúng cách.
+
+**Sai:**
+
+```typescript
+// ❌ Inline function — tạo mới mỗi lần render
+const useGetUserNames = () => {
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+    select: (data) => data.map((user) => user.name),
+  });
+};
+
+// ❌ Function thường không bọc useCallback
+const useGetUserNames = () => {
+  const selectNames = (data: User[]) => data.map((user) => user.name);
+
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+    select: selectNames,
+  });
+};
+```
+
+**Đúng:**
+
+```typescript
+// ✅ Bọc select bằng useCallback với đầy đủ dependencies
+const useGetUserNames = () => {
+  const selectNames = useCallback(
+    (data: User[]) => data.map((user) => user.name),
+    [],
+  );
+
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+    select: selectNames,
+  });
+};
+
+// ✅ Khi select phụ thuộc vào biến bên ngoài, thêm vào dependencies
+const useGetFilteredUsers = (keyword: string) => {
+  const selectFiltered = useCallback(
+    (data: User[]) => data.filter((user) => user.name.includes(keyword)),
+    [keyword],
+  );
+
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: fetchUsers,
+    select: selectFiltered,
+  });
+};
+```

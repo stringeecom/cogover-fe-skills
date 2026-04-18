@@ -9,7 +9,7 @@ Các rule này KHÔNG có ngoại lệ. Vi phạm = sửa lại, không giải t
 3. **KHÔNG `vi.mock('src/apis/...')`** — mock API qua MSW handler mặc định trong `src/__mocks__/handlers/`.
 4. **KHÔNG `fireEvent`** — luôn dùng `userEvent`.
 5. **KHÔNG `npx vitest`** — luôn qua `npm run test` / `npm run coverage`.
-6. **Coverage**: lines ≥ 90%, branches = 100% cho mỗi file source.
+6. **Coverage (TUYỆT ĐỐI, KHÔNG NEGOTIATE)**: **lines = 100%** VÀ **branches = 100%** cho mỗi file source. KHÔNG chấp nhận bất kỳ tỷ lệ nào thấp hơn — thiếu 1 line hoặc 1 branch = chưa xong. Chỉ được phép < 100% khi dùng `/* v8 ignore */` kèm lý do defensive rõ ràng (xem section "Yêu cầu Coverage").
 7. **BẮT BUỘC FEEDBACK khi phát hiện logic bất hợp lý** — trong quá trình viết test, nếu thấy bất kỳ logic nào trong code nguồn **có vẻ sai, mâu thuẫn, hoặc không hợp lý** (điều kiện ngược, dependency thiếu/thừa, edge case không handle, return value lạ, side-effect không rõ ràng, naming không khớp behavior...) → **DỪNG NGAY, KHÔNG viết test theo logic đó**, báo lại cho user kiểm tra xem code có bị bug không. Tuyệt đối tránh việc "viết test pass theo logic sai" — điều đó sẽ lock bug vào codebase và khiến test mất ý nghĩa. Xem section "Feedback khi phát hiện logic bất hợp lý" bên dưới.
 
 ## Tech Stack
@@ -101,7 +101,7 @@ it("should return 'minor' when age is below 18", () => {
 
 - Component cha render thật component con (theo rule "KHÔNG mock component"). Nếu component con chưa có test và còn bug → test cha fail vì lý do không liên quan tới cha → khó debug.
 - Utils/hooks được nhiều component dùng chung → test utils trước sẽ phát hiện bug sớm, tránh viết lại nhiều lần khi fix.
-- Leaf file (utils, helpers, pure functions) coverage dễ đạt 90% nhất → làm trước để build momentum.
+- Leaf file (utils, helpers, pure functions) coverage dễ đạt 100% nhất → làm trước để build momentum.
 
 #### Các bước khảo sát
 
@@ -124,7 +124,7 @@ it("should return 'minor' when age is below 18", () => {
 
 5. **Viết test tuần tự theo thứ tự trên**, mỗi file:
    - Viết test → chạy test (Bước 1 "Workflow tiết kiệm token") → verify pass
-   - Check coverage (Bước 2) → bổ sung case tới khi ≥ 90%
+   - Check coverage (Bước 2) → bổ sung case tới khi **lines = 100% VÀ branches = 100%**
    - Mới chuyển sang file tier tiếp theo
 
 #### Ví dụ
@@ -687,16 +687,26 @@ renderComponent(<ParentPage />);
 
 ## Yêu cầu Coverage
 
-**Mục tiêu (BẮT BUỘC cả 2):**
-1. **Lines coverage ≥ 90%** cho mỗi file source
+**Mục tiêu (BẮT BUỘC cả 2 — KHÔNG NEGOTIATE):**
+1. **Lines coverage = 100%** cho mỗi file source — KHÔNG được bỏ sót bất kỳ line nào
 2. **Branches coverage = 100%** cho mỗi file source — KHÔNG được thiếu bất kỳ nhánh nào
 
-- Ưu tiên cover: happy path → error/edge cases → conditional branches → fallback values
-- Nếu chưa đạt mục tiêu, bổ sung test cases cho các nhánh chưa cover (if/else, early return, error handling, edge cases)
+**Tại sao tuyệt đối 100%?**
+- Mỗi line / branch chưa cover = một vùng code chưa được verify behavior → có thể ẩn bug mà test không phát hiện.
+- "90% là đủ" là cái bẫy: 10% còn lại thường chính là edge case / error path — nơi bug hay nằm nhất.
+- Nếu 1 line/branch thực sự "không thể test" → đó là signal code có vấn đề (dead code, defensive thừa) → xoá đi, KHÔNG skip test.
 
-### 100% Branches — cover đủ mọi nhánh
+**Quy trình bắt buộc:**
+- Ưu tiên cover: happy path → error/edge cases → conditional branches → fallback values → early returns → default params → optional chaining
+- Chạy coverage sau mỗi lần viết test → đọc cột `% Lines` và `% Branch` + `Uncovered Line #s`
+- Nếu `% Lines < 100` hoặc `% Branch < 100` → **BẮT BUỘC bổ sung test case**, KHÔNG được dừng. Lặp lại tới khi cả 2 cột đều = 100.
+- Nếu không thể đạt 100% cho 1 line/branch cụ thể → chỉ 2 lựa chọn:
+  1. Xoá line/branch thừa khỏi source (dead code / defensive không cần thiết)
+  2. Dùng `/* v8 ignore */` kèm comment lý do defensive rõ ràng (xem "Khi nào được phép < 100% branches" bên dưới)
 
-**Mọi điểm rẽ nhánh trong code đều phải có test cover cả 2 phía (hoặc tất cả các nhánh nếu nhiều hơn 2).** Không được bỏ qua nhánh vì "khó tạo điều kiện" hay "trường hợp không thể xảy ra" — nếu code có branch đó thì test phải cover nó, hoặc xoá branch thừa khỏi source.
+### 100% Lines + 100% Branches — cover đủ mọi line và mọi nhánh
+
+**Mọi line trong code đều phải được thực thi ít nhất 1 lần trong test.** Mọi điểm rẽ nhánh đều phải có test cover cả 2 phía (hoặc tất cả các nhánh nếu nhiều hơn 2). Không được bỏ qua line/branch vì "khó tạo điều kiện" hay "trường hợp không thể xảy ra" — nếu code có line/branch đó thì test phải cover nó, hoặc xoá khỏi source.
 
 #### Các loại branch phải cover
 
@@ -739,13 +749,13 @@ jq '."'"$(pwd)"'/src/path/to/file.ts" | {branchMap, b}' coverage/coverage-final.
 
 Branch nào có giá trị `0` trong array `b[id]` → đó là branch chưa cover → dựa vào `branchMap[id].loc` để biết line → bổ sung test case.
 
-#### Khi nào được phép < 100% branches
+#### Khi nào được phép < 100% lines / branches
 
-Chỉ 2 trường hợp:
+Chỉ 2 trường hợp (áp dụng cho cả lines và branches):
 1. **Defensive code không thể trigger**: ví dụ `if (!obj) throw new Error('unreachable')` với `obj` luôn có giá trị theo type. → Giải pháp: xoá defensive branch hoặc dùng `/* v8 ignore next */` comment với lý do rõ ràng.
 2. **Branch do TypeScript narrow tự thêm**: hiếm gặp. → Cùng giải pháp `v8 ignore` với comment giải thích.
 
-KHÔNG được dùng `v8 ignore` chỉ vì "lười viết test case". Mỗi lần dùng phải có comment lý do cụ thể, reviewer sẽ kiểm tra.
+KHÔNG được dùng `v8 ignore` chỉ vì "lười viết test case" hay "khó mock". Mỗi lần dùng phải có comment lý do cụ thể, reviewer sẽ kiểm tra. Nếu không rõ có phải defensive thật không → viết test cover, KHÔNG ignore.
 
 ```typescript
 // ✅ OK: có lý do defensive rõ ràng
@@ -939,8 +949,8 @@ export const createMockSampleMessage = (overrides?: Partial<SampleMessageListRes
 - [ ] Khi cần nhiều response khác nhau → truyền params khác nhau từ test + if/else trong handler mặc định, HẠN CHẾ `server.use()` + `{ once: true }` trong test body
 - [ ] **Mọi giá trị mock** (data, props, response, handler, context, event...) viết đầy đủ theo type — KHÔNG `as unknown as T`, `as any`, `as T`, `{} as T`. Type quá lớn → dùng factory function có `Partial<T>` override
 - [ ] Mock data constants đặt trong `src/__mocks__/` để tái sử dụng
-- [ ] Đạt >= 90% coverage lines cho mỗi file source
-- [ ] Đạt 100% coverage branches cho mỗi file source (nếu < 100%, xác định branch thiếu qua `coverage-final.json` và bổ sung test, hoặc dùng `v8 ignore` kèm lý do rõ ràng)
+- [ ] **Đạt 100% coverage lines cho mỗi file source** — không chấp nhận < 100%. Nếu còn line chưa cover, đọc `Uncovered Line #s` và bổ sung test, hoặc dùng `v8 ignore` kèm lý do defensive rõ ràng
+- [ ] **Đạt 100% coverage branches cho mỗi file source** — không chấp nhận < 100%. Nếu < 100%, xác định branch thiếu qua `coverage-final.json` và bổ sung test, hoặc dùng `v8 ignore` kèm lý do rõ ràng
 - [ ] Khảo sát cấu trúc thư mục trước khi viết (Bước 0) → viết theo thứ tự leaf-first (Tier 0 → Tier 4)
 - [ ] Chạy test filter theo file + `--reporter=dot` + `tail -30` để verify pass (xem "Workflow tiết kiệm token")
 - [ ] Chạy coverage với `--coverage.include='src/path/to/file.ts'` để đọc cột `Uncovered Line #s`, KHÔNG chạy coverage toàn project

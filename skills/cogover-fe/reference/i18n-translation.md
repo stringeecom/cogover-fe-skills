@@ -30,6 +30,15 @@ Khi được yêu cầu "dịch các text tiếng Việt", **LUÔN hỏi lại**
 1. **Namespace** là gì? (ví dụ: `CHAT`, `CONTACT`, `COMMON`, ...)
 2. **Prefix** là gì? (ví dụ: `contactDetail`, `chatMessage`, ...)
 
+### Quy tắc prefix đặc biệt (CRITICAL — chỉ áp dụng cho key MỚI)
+
+> ⚠️ **NHẤN MẠNH**: Với **mọi key mới**, BẮT BUỘC phải tách theo loại nội dung:
+>
+> - Text thuộc **message validate** (lỗi form, lỗi nhập liệu, required, min/max, định dạng sai, ...) → **luôn** dùng prefix `schema`.
+> - Text thuộc **thông báo** (toast, alert, message báo thành công/thất bại sau thao tác, ...) → **luôn** dùng prefix `notification`.
+>
+> Các key CŨ không tuân theo rule này thì **KHÔNG cần sửa**, giữ nguyên hiện trạng. Rule này **chỉ** áp dụng khi tạo key **mới**.
+
 ---
 
 ## Bước 2 (BẮT BUỘC — KHÔNG BAO GIỜ ĐƯỢC BỎ QUA): Tìm key tương đồng trong namespace COMMON
@@ -107,6 +116,15 @@ const { t: tChat } = useTranslation(I18nNS.CHAT);
 
 Trước khi thêm key mới vào file JSON, phải kiểm tra full path `<prefix>.<key>` chưa tồn tại.
 
+### Quy tắc độ sâu key (CRITICAL)
+
+**KHÔNG BAO GIỜ được tạo key ở cấp thứ 3.** Key **luôn** có dạng `<prefix>.<name>`, tối đa 2 cấp.
+
+- Ví dụ ĐÚNG: `schema.emailRequired`, `notification.saveSuccess`, `contactDetail.confirm`.
+- Ví dụ SAI: `schema.email.required`, `notification.save.success`, `contactDetail.form.confirm` — đây là dạng `<prefix>.<name_1>.<name_2>`, **tuyệt đối không** được dùng.
+
+Nếu cần biểu diễn thêm ngữ cảnh, **gộp vào cùng `<name>`** bằng camelCase thay vì tách thành cấp con.
+
 ---
 
 ## Bước 7: Sử dụng trong code
@@ -158,3 +176,5 @@ Sau khi dịch xong và không còn thắc mắc gì nữa, **tự động updat
 - Placeholder dùng `{{name}}` (ngoặc kép), không phải `{name}`.
 - Số thứ tự trong `components` của `<Trans>` bắt đầu từ `1`.
 - Không trùng key trong cùng namespace + cùng prefix.
+- **Key mới** thuộc message validate → prefix `schema`; thuộc thông báo → prefix `notification` (key cũ giữ nguyên).
+- Key **tối đa 2 cấp** (`<prefix>.<name>`), tuyệt đối không tạo cấp thứ 3.

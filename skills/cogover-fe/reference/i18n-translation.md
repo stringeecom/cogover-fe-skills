@@ -32,13 +32,15 @@ Khi được yêu cầu "dịch các text tiếng Việt", **LUÔN hỏi lại**
 
 ---
 
-## Bước 2 (BẮT BUỘC): Tìm key tương đồng trong namespace COMMON
+## Bước 2 (BẮT BUỘC — KHÔNG BAO GIỜ ĐƯỢC BỎ QUA): Tìm key tương đồng trong namespace COMMON
+
+> ⚠️ **CỰC KỲ QUAN TRỌNG**: Bước này **KHÔNG BAO GIỜ** được bỏ qua dưới bất kỳ lý do nào. Mọi lần dịch đều BẮT BUỘC phải mở và đọc file `common.json` trước khi tạo key mới.
 
 **TRƯỚC KHI tạo key mới**, luôn mở file `build_docker/static/locales/vi-VN/common.json` của dự án static và tìm xem đã có key nào có bản dịch **tương đồng** (về nghĩa) với text đang cần dịch hay chưa.
 
 - Nếu tìm thấy → **DÙNG LUÔN** key đó, không tạo mới.
 - Các key dùng chung phổ biến: `save`, `cancel`, `confirm`, `delete`, `edit`, `close`, `submit`, `search`, `back`, ...
-- Nếu không tìm thấy dự án static để mở file này → hỏi lại user (theo Bước 0).
+- **Nếu KHÔNG tìm thấy file `common.json`** (không tìm thấy dự án static, sai đường dẫn, file không tồn tại, ...) → **DỪNG LẠI NGAY và HỎI LẠI USER**, tuyệt đối **KHÔNG** được tự đoán, tự bỏ qua, hay tự tạo key mới mà chưa tra cứu.
 
 ---
 
@@ -141,11 +143,17 @@ Sau khi dịch xong và không còn thắc mắc gì nữa, **tự động updat
 - Giữ nguyên format JSON, thứ tự key hợp lý theo prefix.
 - Nếu còn thắc mắc về nghĩa/placeholder/HTML tag → hỏi user trước, CHƯA update.
 
+### Ngoại lệ: Dự án live-chat
+
+> Nếu đang sửa i18n cho dự án **live-chat** → update thẳng vào `src/languages/locales/<locale>/<namespace>.json` **của chính dự án live-chat**, **KHÔNG** update sang dự án static.
+
 ---
 
 ## Lưu ý quan trọng
 
 - **Bước 0 và Bước 2 là bắt buộc** — luôn tìm dự án static + tra key COMMON trước khi dịch.
+- **Bước 2 KHÔNG BAO GIỜ được bỏ qua.** Nếu không tìm thấy `common.json` → DỪNG và HỎI LẠI USER, không tự đoán.
+- **Dự án live-chat**: update i18n vào `src/languages/locales` của chính dự án live-chat, **không** dùng dự án static.
 - **Không** đưa prefix vào cột `key` của bảng.
 - Placeholder dùng `{{name}}` (ngoặc kép), không phải `{name}`.
 - Số thứ tự trong `components` của `<Trans>` bắt đầu từ `1`.

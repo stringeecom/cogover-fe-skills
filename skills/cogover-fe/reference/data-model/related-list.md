@@ -9,7 +9,7 @@ tags: related-list, lookup, reference, filter, ui-kit
 
 ### Khái niệm
 
-Khi một field `reference`, `lookup_normal` hoặc `lookup_parent` (gọi chung là **trường lookup**) được tạo trong **Object A** trỏ sang **Object B** → ở **Object B tự động tạo ra một related list** tương ứng. KHÔNG có API tạo related list riêng — BE tự sinh ngay khi field lookup được tạo.
+Khi một field `lookup_normal` hoặc `reference` (dependency) — gọi chung là **trường lookup** — được tạo trong **Object A** trỏ sang **Object B** → ở **Object B tự động tạo ra một related list** tương ứng. KHÔNG có API tạo related list riêng — BE tự sinh ngay khi field lookup được tạo.
 
 ### RULE-RL-01: Cấu trúc Related List
 
@@ -20,7 +20,7 @@ Schema đầy đủ trả về từ `withRelatedList=1`:
 | `id` | ID của related list (vd `RL0UCCQEJKM92`) |
 | `name` | Tên hiển thị (lấy từ `related_list_name` lúc tạo field) |
 | `slug` | Slug định danh (lấy từ `related_list_slug` lúc tạo field) |
-| `lookupType` | `"lookup_normal"` / `"lookup_parent"` / `"reference"` |
+| `lookupType` | `"lookup_normal"` / `"reference"` |
 | `status` | `0` mặc định (**inactive** — không hiện trên record); `1` khi user kích hoạt |
 | `sort` | Thứ tự hiển thị trong tab "Liên quan" |
 | `displayColumn` | `null` mặc định — JSON config column nào hiện trên record (set qua UI Cài đặt) |
@@ -139,6 +139,6 @@ Trang này list mọi related list trên object đó, mỗi card hiển thị:
 | Action | Hệ quả |
 |---|---|
 | Xoá field lookup (`lookup_normal`/`reference`) | BE cascade **xoá related list** trên target |
-| Xoá field `lookup_parent` (dependency) | Cascade xoá related list + xoá field ngược (`link_field`) trên target + **xoá toàn bộ record con** |
+| Xoá field `reference` (dependency) | Cascade xoá related list trên target + **xoá toàn bộ record con** |
 | Xoá object A (chứa field lookup) | Cascade xoá field + related list trên B |
 | Xoá object B (target) | Field lookup trên A invalid (BE set null hoặc xoá tuỳ config) |

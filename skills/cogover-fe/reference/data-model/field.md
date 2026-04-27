@@ -54,7 +54,7 @@ Trên form `Settings → Object → {object} → Cấu hình trường → Tạo
 | 18 | Tra cứu thường (Normal lookup) | Lookup tới object khác (single/multiple) | `lookup_normal`, `reference` |
 | 19 | Đánh số tự động (Auto-number) | Tự sinh số định danh theo prefix/format/start/step | `auto_number` |
 | 20 | Công thức (Formula) | Tính toán từ field khác, **read-only** | `formula` |
-| 21 | Tra cứu phụ thuộc (Dependency lookup) | Quan hệ master-detail, ràng buộc đối tượng chính | `lookup_parent` |
+| 21 | Tra cứu phụ thuộc (Dependency lookup) | Quan hệ master-detail, ràng buộc đối tượng chính | `reference` |
 | 22 | Tổng hợp (Roll-up Summary) | Sum / Count / Max / Min trên bản ghi liên quan qua dependency lookup | `rollup_summary` |
 
 **Lưu ý**:
@@ -72,7 +72,7 @@ Trên form `Settings → Object → {object} → Cấu hình trường → Tạo
 | Lựa chọn | `single_choice`, `multi_choices`, `checkbox`, `boolean`, `radio_button`, `select_list` |
 | Số | `numeric`, `decimal`, `percent`, `currency`, `auto_number` |
 | Ngày giờ | `date`, `date_range`, `time`, `time_range`, `time_duration`, `date_time`, `date_time_range` |
-| Liên kết | `lookup_parent`, `lookup_peer2peer`, `lookup_normal`, `embedded`, `reference`, `children`, `link` |
+| Liên kết | `lookup_normal`, `reference`, `lookup_peer2peer`, `embedded`, `children`, `link` |
 | Khác | `url`, `email`, `phone`, `file`, `regex`, `cascading`, `rating`, `formula`, `rollup_summary` |
 
 ### RULE-FIELD-04: fieldMetaData theo từng loại field

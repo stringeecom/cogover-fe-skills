@@ -31,6 +31,7 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 - Task phức tạp → đọc song song nhiều Read calls
 - Delegate subagent → truyền nội dung reference vào prompt (subagent không đọc được skill files)
 - Import component/hook → luôn từ `@stringeecom/ui-kit`
+- Import nội bộ → dùng path alias `src/foo/bar` khi relative vượt quá 2 cấp `..` (tức `../../../...` trở lên). Cho phép relative ở độ sâu `./`, `../`, `../../`. Chi tiết: `internal-import-path`
 - `Link` và `useNavigate` → luôn từ `@stringeecom/ui-kit` (wrapper tự gắn `appSlug`). Ngoại lệ: file setup `StringeeUtilProvider` và 2 dự án `id`, `account`. Chi tiết: `uikit-link-navigate`
 - Text mới → viết tiếng Việt trước, dịch i18n khi được yêu cầu
 - Date/Time → luôn dùng `dayjs`
@@ -47,7 +48,7 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 ## Reference Files
 
 ### Foundation & Workflow
-`color-palette-usage` · `cx-class-grouping` · `spacing-rem-only` · `tokens-tailwind-config` · `typography-prose-classes` · `no-auto-markdown` · `no-typescript-any` · `prettier-and-lint-check` · `uikit-import-source` · `uikit-text-vietnamese-first` · `uikit-no-auto-commit` · `uikit-parallel-sub-agents` · `commit-convention` · `i18n-translation`
+`color-palette-usage` · `cx-class-grouping` · `spacing-rem-only` · `tokens-tailwind-config` · `typography-prose-classes` · `no-auto-markdown` · `no-typescript-any` · `prettier-and-lint-check` · `uikit-import-source` · `internal-import-path` · `uikit-text-vietnamese-first` · `uikit-no-auto-commit` · `uikit-parallel-sub-agents` · `commit-convention` · `i18n-translation`
 
 ### Data & Query
 `uikit-object-field-record` · `uikit-tanstack-query-hooks` · `dayjs-date-time`

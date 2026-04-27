@@ -51,7 +51,7 @@ Mô hình **routing table + on-demand reference**. File này = index. Chi tiết
 `color-palette-usage` · `cx-class-grouping` · `spacing-rem-only` · `tokens-tailwind-config` · `typography-prose-classes` · `no-auto-markdown` · `no-typescript-any` · `prettier-and-lint-check` · `uikit-import-source` · `internal-import-path` · `uikit-text-vietnamese-first` · `uikit-no-auto-commit` · `uikit-parallel-sub-agents` · `commit-convention` · `i18n-translation`
 
 ### Data & Query
-`uikit-object-field-record` · `uikit-tanstack-query-hooks` · `dayjs-date-time`
+`data-model/object` · `data-model/field` · `data-model/record` · `data-model/related-list` · `uikit-tanstack-query-hooks` · `dayjs-date-time`
 
 ### Form System
 `uikit-form-react-hook-form` · `uikit-form-builder` · `uikit-form-item` · `uikit-form-control-label`

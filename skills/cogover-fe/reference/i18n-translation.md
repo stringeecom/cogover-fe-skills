@@ -167,10 +167,58 @@ Sau khi dịch xong và không còn thắc mắc gì nữa, **tự động updat
 
 ---
 
+## Bước 9 (CỰC KỲ QUAN TRỌNG): Quy tắc resolve conflict file JSON i18n
+
+> ⚠️ **NHẤN MẠNH — TUYỆT ĐỐI KHÔNG ĐƯỢC XEM NHẸ**: File i18n JSON là object **lồng nhiều cấp** (`root → <prefix> → <key>`). Khi resolve conflict (merge, rebase, hoặc chỉ đơn giản là append key mới gần cuối file), CỰC KỲ DỄ nhét key vào **nhầm prefix** mà không hề hay biết — đặc biệt là rơi vào prefix CUỐI cùng của file thay vì prefix mong muốn. Bug này đã xảy ra trong thực tế (case `selectRecord`, `selectAll`, `assignTo`, ... lẽ ra ở `common` nhưng bị nhét vào `ckeditor`) và **rất khó phát hiện** vì code vẫn build, test vẫn pass — chỉ phát hiện khi user nhìn key bằng mắt thường.
+>
+> **MỌI lần** chạm vào file i18n JSON (thêm key mới, resolve conflict, merge, rebase) đều BẮT BUỘC tuân thủ checklist dưới đây.
+
+### 9.1 Trước khi sửa — xác minh cấu trúc
+
+- Mở file ở IDE có **code folding**. Fold collapse hết object cấp 2 để nhìn rõ ranh giới từng section (`common`, `ckeditor`, `inventoryErrorResponse`, ...).
+- Xác định **JSON path đầy đủ** cho key cần thêm: `root → <prefix> → <key>`. **TUYỆT ĐỐI KHÔNG** nghĩ theo kiểu "thêm vào cuối file" — file nested thì "cuối file" = cuối object cuối cùng, không phải cuối prefix muốn thêm.
+- Đếm indentation của dấu `}`:
+  - `}` indent 4 space → đóng 1 prefix con (như `common`, `ckeditor`)
+  - `}` indent 0 → đóng root JSON
+  Đặt key dưới `}` indent 4 = đã văng ra khỏi prefix.
+
+### 9.2 Khi append/thêm key
+
+- **KHÔNG** append mù vào cuối file. Append vào **cuối prefix đúng**, ngay trước dấu `},` ngăn cách với prefix kế tiếp.
+- Đặt key mới **gần các key liên quan** trong cùng prefix (vd: `selectRecord` cạnh `selectData`, `selectStatus` trong `common`) thay vì luôn append cuối. Vừa giảm conflict, vừa tự kiểm tra được "key này có hợp với section này không".
+
+### 9.3 Khi resolve conflict
+
+- Nếu conflict marker `<<<<<<<` rơi vào vùng nhiều `}` san sát nhau → **DỪNG LẠI**, vẽ ra cấu trúc trước, không quyết định bằng cảm tính.
+- Khi 2 nhánh cùng thêm key vào cùng prefix: **gộp thủ công**, không dùng "accept incoming/current" toàn bộ.
+- Khuyến nghị bật `git config merge.conflictStyle diff3` để thấy luôn cả base (`|||||||`), dễ truy ai thêm gì, ở đâu.
+
+### 9.4 Sau khi sửa — VERIFY BẮT BUỘC
+
+Trước khi commit, **bắt buộc** chạy đủ 3 verify dưới:
+
+1. **Prettier**: `npx prettier --write <file>` — sai cú pháp JSON sẽ fail ngay.
+2. **Verify prefix bằng jq**: với mỗi key vừa thêm, xác nhận nó nằm đúng prefix mong muốn:
+   ```
+   jq '.<prefix> | has("<keyName>")' build_docker/static/locales/vi-VN/<namespace>.json
+   ```
+   Phải trả về `true`. Nếu trả về `false` → key đang ở nhầm prefix khác.
+3. **Đồng bộ cross-locale**: 2 locale phải có cùng tập key:
+   ```
+   diff <(jq -r '[paths(scalars)] | sort | .[] | join(".")' build_docker/static/locales/vi-VN/<namespace>.json) \
+        <(jq -r '[paths(scalars)] | sort | .[] | join(".")' build_docker/static/locales/en-US/<namespace>.json)
+   ```
+   Diff trống = OK. Có dòng diff = thiếu key hoặc nhầm prefix ở 1 locale.
+
+Nếu **bất kỳ verify nào fail** → DỪNG, fix tại chỗ trước khi commit. Không bao giờ commit với verify đỏ và lý do "sẽ fix sau".
+
+---
+
 ## Lưu ý quan trọng
 
 - **Bước 0 và Bước 2 là bắt buộc** — luôn tìm dự án static + tra key COMMON trước khi dịch.
 - **Bước 2 KHÔNG BAO GIỜ được bỏ qua.** Nếu không tìm thấy `common.json` → DỪNG và HỎI LẠI USER, không tự đoán.
+- **Bước 9 KHÔNG BAO GIỜ được bỏ qua** khi merge / resolve conflict / append key — với JSON lồng, "cuối file" ≠ "cuối prefix bạn muốn". Sai prefix là bug thầm lặng, build vẫn pass nhưng key ở nhầm chỗ.
 - **Dự án live-chat**: update i18n vào `src/languages/locales` của chính dự án live-chat, **không** dùng dự án static.
 - **Không** đưa prefix vào cột `key` của bảng.
 - Placeholder dùng `{{name}}` (ngoặc kép), không phải `{name}`.
